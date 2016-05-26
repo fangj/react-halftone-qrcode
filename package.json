@@ -2,9 +2,12 @@
   "name": "react-halftone-qrcode",
   "version": "1.0.0",
   "description": "A React component to generate halftone QR codes with image.",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:lib": "rimraf lib && NODE_ENV=production babel -d lib/ src/",
+    "build:dist": "rimraf dist && NODE_ENV=production webpack --config webpack.config.dist.js --optimize-minimize",
+    "dist": "npm run build:lib && npm run build:dist"
   },
   "repository": {
     "type": "git",
@@ -28,6 +31,7 @@
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-1": "^6.5.0",
     "react": "^15.1.0",
-    "react-dom": "^15.1.0"
+    "react-dom": "^15.1.0",
+    "rimraf": "^2.5.2"
   }
 }

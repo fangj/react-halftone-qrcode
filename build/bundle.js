@@ -67,7 +67,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	_reactDom2.default.render(_react2.default.createElement(_index2.default, { src: "./mycat.jpg", text: "https://github.com/fangj/Halftone-QRCode-Generator" }), document.getElementById("root"));
+	_reactDom2.default.render(_react2.default.createElement(_index2.default, { src: "./catpaw-bw.jpg", text: "https://github.com/fangj/react-halftone-qrcode" }), document.getElementById("root"));
 
 /***/ },
 /* 2 */
@@ -20374,10 +20374,6 @@
 
 	"use strict";
 
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _react = __webpack_require__(2);
@@ -20426,14 +20422,17 @@
 	      var _props = this.props;
 	      var src = _props.src;
 	      var text = _props.text;
-	      var bgColor = _props.bgColor;
-	      var fgColor = _props.fgColor;
+	      var colorLight = _props.colorLight;
+	      var colorDark = _props.colorDark;
 
 	      var img = new Image();
 	      img.src = src;
 	      img.onload = function () {
 	        var c = _this2.refs.canvas;
 	        var ctx = c.getContext("2d");
+	        ctx.fillStyle = "#808080";
+	        ctx.fillRect(0, 0, c.width, c.height);
+	        ctx.drawImage(img, 0, 0, c.width, c.height);
 	        var imageData = ctx.getImageData(0, 0, c.width, c.height);
 	        imageData = (0, _dither2.default)(imageData);
 	        ctx.putImageData(imageData, 0, 0);
@@ -20448,7 +20447,7 @@
 
 	        var halftoneQRArray = halftoneQR(qr.returnByteArray(), controls.returnByteArray());
 
-	        var qrc = drawArrayToCanvas(halftoneQRArray, bgColor, fgColor);
+	        var qrc = drawArrayToCanvas(halftoneQRArray, colorLight, colorDark);
 	        ctx.imageSmoothingEnabled = false;
 	        ctx.drawImage(qrc, 0, 0, c.width, c.height);
 	      };
@@ -20471,20 +20470,19 @@
 	  size: _react2.default.PropTypes.number,
 	  pixelSize: _react2.default.PropTypes.number,
 	  level: _react2.default.PropTypes.oneOf(['L', 'M', 'Q', 'H']),
-	  bgColor: _react2.default.PropTypes.string,
-	  fgColor: _react2.default.PropTypes.string
+	  colorLight: _react2.default.PropTypes.string,
+	  colorDark: _react2.default.PropTypes.string
 	};
 	HalftoneQRCode.defaultProps = {
 	  pixelSize: 2,
 	  size: 246,
 	  level: "H",
-	  bgColor: "#FFFFFF",
-	  fgColor: "#000000"
+	  colorLight: "#FFFFFF",
+	  colorDark: "#000000"
 	};
-	exports.default = HalftoneQRCode;
 
 
-	function drawArrayToCanvas(arr, bgColor, fgColor) {
+	function drawArrayToCanvas(arr, colorLight, colorDark) {
 	  var c = document.createElement('canvas');
 	  var size = arr.length;
 	  c.setAttribute('width', size);
@@ -20496,15 +20494,16 @@
 	        continue;
 	      }
 	      if (arr[i][j] === true) {
-	        ctx.fillStyle = bgColor;
+	        ctx.fillStyle = colorDark;
 	      } else {
-	        ctx.fillStyle = fgColor;
+	        ctx.fillStyle = colorLight;
 	      }
 	      ctx.fillRect(i, j, 1, 1);
 	    }
 	  }
 	  return c;
 	}
+	module.exports = HalftoneQRCode;
 
 /***/ },
 /* 170 */

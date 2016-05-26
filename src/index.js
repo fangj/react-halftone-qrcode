@@ -3,7 +3,7 @@ import dither from "./lib/dither";
 var qrcode=require("./lib/qrcode");
 var halftoneQR=require("./lib/halftoneQR");
 
-export default class HalftoneQRCode extends React.Component {
+class HalftoneQRCode extends React.Component {
 
   static propTypes= {
     text: React.PropTypes.string.isRequired,
@@ -11,16 +11,16 @@ export default class HalftoneQRCode extends React.Component {
     size: React.PropTypes.number,
     pixelSize: React.PropTypes.number,
     level: React.PropTypes.oneOf(['L', 'M', 'Q', 'H']),
-    bgColor: React.PropTypes.string,
-    fgColor: React.PropTypes.string,
+    colorLight: React.PropTypes.string,
+    colorDark: React.PropTypes.string
   };
 
   static defaultProps = {
     pixelSize:2,
     size: 246,
     level: "H",
-    bgColor: "#FFFFFF",
-    fgColor: "#000000",
+    colorLight: "#FFFFFF",
+    colorDark: "#000000",
   };
 
   constructor(props) {
@@ -36,15 +36,20 @@ export default class HalftoneQRCode extends React.Component {
   }
 
   update() {
-    const {src,text,bgColor,fgColor}=this.props;
+    const {src,text,colorLight,colorDark}=this.props;
     const img=new Image();
     img.src=src;
     img.onload=()=>{
       const c=this.refs.canvas;
       var ctx=c.getContext("2d");
+      ctx.fillStyle = "#808080";
+      ctx.fillRect(0,0, c.width,c.height);
+      ctx.drawImage(img,0,0,c.width,c.height);
       var imageData = ctx.getImageData(0, 0, c.width, c.height);
       imageData=dither(imageData);
       ctx.putImageData(imageData,0,0);
+
+
 
       var qr = qrcode(6, "H");
       qr.addData(text);
@@ -56,7 +61,7 @@ export default class HalftoneQRCode extends React.Component {
 
       var halftoneQRArray=halftoneQR(qr.returnByteArray(), controls.returnByteArray());
 
-      var qrc=drawArrayToCanvas(halftoneQRArray,bgColor,fgColor);
+      var qrc=drawArrayToCanvas(halftoneQRArray,colorLight,colorDark);
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(qrc,0,0,c.width,c.height);
     };
@@ -72,7 +77,7 @@ export default class HalftoneQRCode extends React.Component {
   }
 }
 
-function drawArrayToCanvas(arr,bgColor,fgColor){
+function drawArrayToCanvas(arr,colorLight,colorDark){
   const c=document.createElement('canvas');
   var size=arr.length;
   c.setAttribute('width',size);
@@ -82,12 +87,13 @@ function drawArrayToCanvas(arr,bgColor,fgColor){
     for(var j=0;j<arr.length;j++){
        if (arr[i][j] === undefined){continue;} 
        if (arr[i][j] === true) {
-          ctx.fillStyle = bgColor;
+          ctx.fillStyle = colorDark;
         } else {
-          ctx.fillStyle = fgColor;
+          ctx.fillStyle = colorLight;
        }
       ctx.fillRect(i,j, 1, 1);
     }
   }
   return c;
 }
+module.exports=HalftoneQRCode;
