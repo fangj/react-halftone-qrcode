@@ -3,6 +3,10 @@
 A React component to generate [Halftone QRCode](http://vecg.cs.ucl.ac.uk/Projects/SmartGeometry/halftone_QR/halftoneQR_sigga13.html) with image.
 Inspired by [Lachlan Arthur](http://jsfiddle.net/lachlan/r8qWV/)
 
+## Demo
+
+http://fangj.github.io/react-halftone-qrcode/
+
 ## Installation
 
 ```sh
