@@ -6,7 +6,7 @@ Inspired by [Lachlan Arthur](http://jsfiddle.net/lachlan/r8qWV/)
 ## Installation
 
 ```sh
-react-halftone-qrcode
+npm install react-halftone-qrcode
 ```
 
 ## Usage
