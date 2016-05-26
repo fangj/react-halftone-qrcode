@@ -39,6 +39,7 @@ class HalftoneQRCode extends React.Component {
     const {src,text,colorLight,colorDark}=this.props;
     const img=new Image();
     img.src=src;
+    console.log('img.src',img.src);
     img.onload=()=>{
       const c=this.refs.canvas;
       var ctx=c.getContext("2d");
@@ -48,8 +49,6 @@ class HalftoneQRCode extends React.Component {
       var imageData = ctx.getImageData(0, 0, c.width, c.height);
       imageData=dither(imageData);
       ctx.putImageData(imageData,0,0);
-
-
 
       var qr = qrcode(6, "H");
       qr.addData(text);
