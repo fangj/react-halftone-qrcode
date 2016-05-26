@@ -16,7 +16,8 @@
   "keywords": [
     "react",
     "halftone",
-    "QRCode"
+    "QRCode",
+    "react-component"
   ],
   "author": "Fang Jian",
   "license": "ISC",
