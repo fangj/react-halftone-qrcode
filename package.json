@@ -1,6 +1,6 @@
 {
   "name": "react-halftone-qrcode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React component to generate halftone QR codes with image.",
   "main": "lib/index.js",
   "scripts": {
