@@ -2,7 +2,7 @@ var path = require("path");
 
 module.exports = {
   entry: [
-    "./examples/index.js"
+    "./examples/index.jsx"
   ],
   output: {
     path: path.join(__dirname, "build"),
@@ -11,7 +11,7 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.js?$/,
+        test: /\.jsx?$/,
         loader: "babel"
       }
     ]

@@ -26,21 +26,41 @@ class Example extends React.Component {
         <Dropzone accept="image/*" multiple={false} onDrop={this.onDrop.bind(this)} className="dropzone">
              <HalftoneQRCode src={src} text={text}/>
         </Dropzone>
+        <canvas ref='gif' />
        </div>
      );
    }
 
    onDrop(files){
+    const gif=this.refs.gif;
+
     const file=files[0];
     // this.setState({src:files[0].preview});
     var reader = new FileReader();
-    reader.readAsDataURL(file);
+    reader.readAsArrayBuffer(file);
+    // reader.readAsBinaryString(file);
+
     reader.onload = function(e) { 
-       var buf=e.target.result;
+       var abuf=e.target.result;
+       console.log(abuf);
+       const buf=new Uint8Array(abuf);
+       console.log(buf[0],buf[1],buf[2]);
        var gr = new omggif.GifReader(buf);
-       var frame_num = this.framenum % gr.numFrames();
-       var frame_info = gr.frameInfo(frame_num);
-      console.log('aa',frame_num,frame_info);
+       var frame_info = gr.frameInfo(0);
+      console.log('gr.width, gr.height',gr.width, gr.height,gr.numFrames(),frame_info);
+      var pixels=[];
+      var start = Date.now();
+      gr.decodeAndBlitFrameBGRA(0, pixels);
+      console.log('Decoded and blit frame in: '  + (Date.now() - start) + 'ms');
+      gif.height=gr.height;
+      gif.width=gr.width;
+      var ctx=gif.getContext("2d");
+      var imageData = ctx.getImageData(0, 0, gif.width, gif.height);
+      console.log(imageData);
+      gr.decodeAndBlitFrameRGBA(0, imageData.data);
+      gr.decodeAndBlitFrameRGBA(1, imageData.data);
+
+      ctx.putImageData(imageData,0,0);
      };
    }
 
