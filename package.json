@@ -29,7 +29,8 @@
     "buffer": "^4.6.0",
     "node-libs-browser": "^1.0.0",
     "react": "^15.1.0",
-    "react-dom": "^15.1.0"
+    "react-dom": "^15.1.0",
+    "tinycolor2": "^1.3.0"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",

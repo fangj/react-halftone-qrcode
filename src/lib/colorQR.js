@@ -1,4 +1,5 @@
-var NGaussian=require('./gaussian');
+var NGaussian=require("./gaussian");
+var tinycolor = require("tinycolor2");
 module.exports={
   limitTemplate,
   limit
@@ -16,12 +17,32 @@ function limitTemplate(qrBytes,ctlBytes,blockSize,d2,minLightness,maxLightness) 
   for (let i = 0; i < DlimitTemplate.length; i++) {
     DlimitTemplate[i]=0;
   }
-  const idx2rowcol=idx=>({row:idx/imageLength,col:idx%imageLength});
-  const rowcol2xy=({row,col})=>({x:row/6,y:row/6});
+  const idx2rowcol=idx=>({row:Math.floor(idx/imageLength),col:Math.floor(idx%imageLength)});
+  const rowcol2xy=({row,col})=>({x:Math.floor(row/6),y:Math.floor(row/6)});
   const rowcol2dxdy=({row,col})=>({dx:row%6,dy:row%6});
+  const dxdy2didx=({dx,dy})=>dy*blockSize+dx;
   var DlimitBlockTemplate=buildDlimitBlockTemplate(blockSize,d2);
   var UlimitBlockTemplate=buildUlimitBlockTemplate(blockSize,d2);
-
+  //构造上限模板
+  for (let i = 0; i < imageLength; i++) {
+    const {row,col}=idx2rowcol(i);//大图中行列
+    const {x,y}=rowcol2xy({row,col});//对应二维码数组中坐标
+    if(ctlBytes[x][y]!==null){//是控制块
+      if(ctlBytes[x][y]>127){//白色
+        DlimitTemplate[i]=maxLightness;
+      }else{
+        UlimitTemplate[i]=minLightness;
+      }
+    }else{//内容块
+      const {dx,dy}=rowcol2dxdy({row,col});//在小块中的偏移
+      const didx=dxdy2didx({dx,dy});
+      if(qrBytes[x][y]>127){//白色
+        DlimitTemplate[i]=DlimitBlockTemplate[didx];
+      }else{//黑色
+        UlimitTemplate[i]=UlimitBlockTemplate[didx];
+      }
+    }
+  }
   return {UlimitTemplate,DlimitTemplate};
 }
 
@@ -52,5 +73,20 @@ function buildUlimitBlockTemplate(blockSize,d2){
 }
 
 function limit(imageData,UlimitTemplate,DlimitTemplate) {
+  var imageDataLength = imageData.data.length;
+  for (var i = 0; i <= imageDataLength; i += 4) {
+    var color=tinycolor({ r: imageData.data[i], g: imageData.data[i+1], b: imageData.data[i+2],a:imageData.data[i+3] });
+    var hsl=color.toHsl();
+    var idx=Math.floor(i/4);
+    if(hsl.l>UlimitTemplate[idx]){
+      hsl.l=UlimitTemplate[idx];
+    }else if(hsl.l<DlimitTemplate[idx]){
+      hsl.l=DlimitTemplate[idx];
+    }
+    var rgb=tinycolor(hsl).toRgb();
+    imageData.data[i] = rgb.r;
+    imageData.data[i+1] = rgb.g;
+    imageData.data[i+2] = rgb.b;
+  }
   return imageData;
 }
