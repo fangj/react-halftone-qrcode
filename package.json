@@ -27,6 +27,7 @@
   "homepage": "https://github.com/fangj/react-halftone-qrcode#readme",
   "dependencies": {
     "buffer": "^4.6.0",
+    "lodash": "^4.13.1",
     "node-libs-browser": "^1.0.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",

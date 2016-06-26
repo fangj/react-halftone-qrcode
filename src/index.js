@@ -6,7 +6,14 @@ class HalftoneQRCode extends React.Component {
 
   static propTypes= {
     text: React.PropTypes.string.isRequired,
-    src: React.PropTypes.string.isRequired
+    src: React.PropTypes.string.isRequired,
+    d2:React.PropTypes.number.isRequired,
+    minLightness:React.PropTypes.number.isRequired,
+  };
+
+  static defaultProps = {
+    d2: 1,
+    minLightness: 0
   };
 
   constructor(props) {
@@ -22,7 +29,7 @@ class HalftoneQRCode extends React.Component {
   }
 
   update() {
-    const {src,text}=this.props;
+    const {src,text,d2,minLightness}=this.props;
     const img=new Image();
     img.src=src;
     console.log('img.src',img.src);
@@ -64,7 +71,7 @@ class HalftoneQRCode extends React.Component {
       controls.addData(text);
       controls.make(true);
 
-      const {UlimitTemplate,DlimitTemplate}=colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(),6,5,0.3);
+      const {UlimitTemplate,DlimitTemplate}=colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(),6,d2,minLightness);
 
       var QRSize=QRsizes[QRversion-1];
 
