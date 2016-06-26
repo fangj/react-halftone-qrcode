@@ -9,7 +9,7 @@ class Example extends React.Component {
    constructor(props) {
      super(props);
      this.state={
-      src:"./catpaw-bw.jpg",
+      src:"./lz.jpg",
       text:"https://github.com/fangj/react-halftone-qrcode"
      };
    }

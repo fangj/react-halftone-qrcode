@@ -88,7 +88,7 @@
 	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Example).call(this, props));
 
 	    _this.state = {
-	      src: "./catpaw-bw.jpg",
+	      src: "./lz.jpg",
 	      text: "https://github.com/fangj/react-halftone-qrcode"
 	    };
 	    return _this;
@@ -20531,7 +20531,7 @@
 	        controls.addData(text);
 	        controls.make(true);
 
-	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(), 6, 1, 0.1, 0.9);
+	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(), 6, 2, 0.2, 0.8);
 
 	        var UlimitTemplate = _colorQR$limitTemplat.UlimitTemplate;
 	        var DlimitTemplate = _colorQR$limitTemplat.DlimitTemplate;
