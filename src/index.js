@@ -64,7 +64,7 @@ class HalftoneQRCode extends React.Component {
       controls.addData(text);
       controls.make(true);
 
-      const {UlimitTemplate,DlimitTemplate}=colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(),6,2,0.2,0.8);
+      const {UlimitTemplate,DlimitTemplate}=colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(),6,5,0.3);
 
       var QRSize=QRsizes[QRversion-1];
 

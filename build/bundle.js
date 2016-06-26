@@ -20531,7 +20531,7 @@
 	        controls.addData(text);
 	        controls.make(true);
 
-	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(), 6, 2, 0.2, 0.8);
+	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(), 6, 5, 0.3);
 
 	        var UlimitTemplate = _colorQR$limitTemplat.UlimitTemplate;
 	        var DlimitTemplate = _colorQR$limitTemplat.DlimitTemplate;
@@ -22177,6 +22177,7 @@
 	  var minLightness = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
 	  var maxLightness = arguments.length <= 5 || arguments[5] === undefined ? 1 : arguments[5];
 
+	  maxLightness = 1 - minLightness;
 	  var baseSize = qrBytes.length;
 	  var imageSize = baseSize * blockSize;
 	  var imageLength = imageSize * imageSize;
@@ -22261,7 +22262,7 @@
 	      var uy = Math.floor(Math.abs(y - center));
 	      var v = gs(ux, uy);
 	      if (v > maxLightness) {
-	        debugger;
+	        // debugger;
 	        v = maxLightness;
 	      }
 	      DlimitBlockTemplate[idx] = v;

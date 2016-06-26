@@ -6,6 +6,7 @@ module.exports={
 };
 
 function limitTemplate(qrBytes,ctlBytes,blockSize=6,d2=1,minLightness=0,maxLightness=1) {
+  maxLightness=1-minLightness;
   var baseSize=qrBytes.length;
   var imageSize=baseSize*blockSize;
   var imageLength=imageSize*imageSize;
@@ -58,7 +59,7 @@ function buildDlimitBlockTemplate(blockSize,d2,maxLightness){
       var uy=Math.floor(Math.abs(y-center));
       var v=gs(ux,uy);
       if(v>maxLightness){
-        debugger;
+        // debugger;
         v=maxLightness;
       }
       DlimitBlockTemplate[idx]=v;
