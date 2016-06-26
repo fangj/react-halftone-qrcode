@@ -20531,7 +20531,7 @@
 	        controls.addData(text);
 	        controls.make(true);
 
-	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray());
+	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray(), 6, 1, 0.1, 0.9);
 
 	        var UlimitTemplate = _colorQR$limitTemplat.UlimitTemplate;
 	        var DlimitTemplate = _colorQR$limitTemplat.DlimitTemplate;
@@ -22206,8 +22206,8 @@
 	    var dy = _ref3.dy;
 	    return dy * blockSize + dx;
 	  };
-	  var DlimitBlockTemplate = buildDlimitBlockTemplate(blockSize, d2);
-	  var UlimitBlockTemplate = buildUlimitBlockTemplate(blockSize, d2);
+	  var DlimitBlockTemplate = buildDlimitBlockTemplate(blockSize, d2, maxLightness);
+	  var UlimitBlockTemplate = buildUlimitBlockTemplate(blockSize, d2, minLightness);
 	  //构造上限模板
 	  for (var _i2 = 0; _i2 < imageLength; _i2++) {
 	    var _idx2rowcol = idx2rowcol(_i2);
@@ -22249,7 +22249,7 @@
 	  return { UlimitTemplate: UlimitTemplate, DlimitTemplate: DlimitTemplate };
 	}
 
-	function buildDlimitBlockTemplate(blockSize, d2) {
+	function buildDlimitBlockTemplate(blockSize, d2, maxLightness) {
 	  var blockLength = blockSize * blockSize;
 	  var DlimitBlockTemplate = new Array(blockLength);
 	  var gs = NGaussian(d2);
@@ -22260,13 +22260,17 @@
 	      var ux = Math.floor(Math.abs(x - center));
 	      var uy = Math.floor(Math.abs(y - center));
 	      var v = gs(ux, uy);
+	      if (v > maxLightness) {
+	        debugger;
+	        v = maxLightness;
+	      }
 	      DlimitBlockTemplate[idx] = v;
 	    }
 	  }
 	  return DlimitBlockTemplate;
 	}
 
-	function buildUlimitBlockTemplate(blockSize, d2) {
+	function buildUlimitBlockTemplate(blockSize, d2, minLightness) {
 	  var blockLength = blockSize * blockSize;
 	  var UlimitBlockTemplate = new Array(blockLength);
 	  var DlimitBlockTemplate = buildDlimitBlockTemplate(blockSize, d2);

@@ -21,8 +21,8 @@ function limitTemplate(qrBytes,ctlBytes,blockSize=6,d2=1,minLightness=0,maxLight
   const rowcol2xy=({row,col})=>({x:Math.floor(col/6),y:Math.floor(row/6)});
   const rowcol2dxdy=({row,col})=>({dx:col%6,dy:row%6});
   const dxdy2didx=({dx,dy})=>dy*blockSize+dx;
-  var DlimitBlockTemplate=buildDlimitBlockTemplate(blockSize,d2);
-  var UlimitBlockTemplate=buildUlimitBlockTemplate(blockSize,d2);
+  var DlimitBlockTemplate=buildDlimitBlockTemplate(blockSize,d2,maxLightness);
+  var UlimitBlockTemplate=buildUlimitBlockTemplate(blockSize,d2,minLightness);
   //构造上限模板
   for (let i = 0; i < imageLength; i++) {
     const {row,col}=idx2rowcol(i);//大图中行列
@@ -46,7 +46,7 @@ function limitTemplate(qrBytes,ctlBytes,blockSize=6,d2=1,minLightness=0,maxLight
   return {UlimitTemplate,DlimitTemplate};
 }
 
-function buildDlimitBlockTemplate(blockSize,d2){
+function buildDlimitBlockTemplate(blockSize,d2,maxLightness){
   var blockLength=blockSize*blockSize;
   var DlimitBlockTemplate=new Array(blockLength);
   var gs=NGaussian(d2);
@@ -57,13 +57,17 @@ function buildDlimitBlockTemplate(blockSize,d2){
       var ux=Math.floor(Math.abs(x-center));
       var uy=Math.floor(Math.abs(y-center));
       var v=gs(ux,uy);
+      if(v>maxLightness){
+        debugger;
+        v=maxLightness;
+      }
       DlimitBlockTemplate[idx]=v;
     }
   }
   return DlimitBlockTemplate;
 }
 
-function buildUlimitBlockTemplate(blockSize,d2){
+function buildUlimitBlockTemplate(blockSize,d2,minLightness){
   var blockLength=blockSize*blockSize;
   var UlimitBlockTemplate=new Array(blockLength);
   var DlimitBlockTemplate=buildDlimitBlockTemplate(blockSize,d2);
