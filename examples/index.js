@@ -2,7 +2,6 @@
  import ReactDOM from "react-dom";
  import HalftoneQRCode from "../src/index";
 import Dropzone from "./react-dropzone";
-var omggif = require('omggif');
 
  
 class Example extends React.Component {
@@ -12,7 +11,7 @@ class Example extends React.Component {
      this.state={
       src:"./catpaw-bw.jpg",
       text:"https://github.com/fangj/react-halftone-qrcode"
-     }
+     };
    }
  
    render() {
@@ -32,16 +31,7 @@ class Example extends React.Component {
 
    onDrop(files){
     const file=files[0];
-    // this.setState({src:files[0].preview});
-    var reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = function(e) { 
-       var buf=e.target.result;
-       var gr = new omggif.GifReader(buf);
-       var frame_num = this.framenum % gr.numFrames();
-       var frame_info = gr.frameInfo(frame_num);
-      console.log('aa',frame_num,frame_info);
-     };
+    this.setState({src:file.preview});
    }
 
    onChange(evt){

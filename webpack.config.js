@@ -2,7 +2,7 @@ var path = require("path");
 
 module.exports = {
   entry: [
-    "./examples/index.jsx"
+    "./examples/index.js"
   ],
   output: {
     path: path.join(__dirname, "build"),

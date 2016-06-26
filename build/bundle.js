@@ -67,7 +67,7 @@
 
 	var _index2 = _interopRequireDefault(_index);
 
-	var _reactDropzone = __webpack_require__(173);
+	var _reactDropzone = __webpack_require__(174);
 
 	var _reactDropzone2 = _interopRequireDefault(_reactDropzone);
 
@@ -78,8 +78,6 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var omggif = __webpack_require__(175);
 
 	var Example = function (_React$Component) {
 	  _inherits(Example, _React$Component);
@@ -120,43 +118,14 @@
 	          _reactDropzone2.default,
 	          { accept: "image/*", multiple: false, onDrop: this.onDrop.bind(this), className: "dropzone" },
 	          _react2.default.createElement(_index2.default, { src: src, text: text })
-	        ),
-	        _react2.default.createElement("canvas", { ref: "gif" })
+	        )
 	      );
 	    }
 	  }, {
 	    key: "onDrop",
 	    value: function onDrop(files) {
-	      var gif = this.refs.gif;
-
 	      var file = files[0];
-	      // this.setState({src:files[0].preview});
-	      var reader = new FileReader();
-	      reader.readAsArrayBuffer(file);
-	      // reader.readAsBinaryString(file);
-
-	      reader.onload = function (e) {
-	        var abuf = e.target.result;
-	        console.log(abuf);
-	        var buf = new Uint8Array(abuf);
-	        console.log(buf[0], buf[1], buf[2]);
-	        var gr = new omggif.GifReader(buf);
-	        var frame_info = gr.frameInfo(0);
-	        console.log('gr.width, gr.height', gr.width, gr.height, gr.numFrames(), frame_info);
-	        var pixels = [];
-	        var start = Date.now();
-	        gr.decodeAndBlitFrameBGRA(0, pixels);
-	        console.log('Decoded and blit frame in: ' + (Date.now() - start) + 'ms');
-	        gif.height = gr.height;
-	        gif.width = gr.width;
-	        var ctx = gif.getContext("2d");
-	        var imageData = ctx.getImageData(0, 0, gif.width, gif.height);
-	        console.log(imageData);
-	        gr.decodeAndBlitFrameRGBA(0, imageData.data);
-	        gr.decodeAndBlitFrameRGBA(1, imageData.data);
-
-	        ctx.putImageData(imageData, 0, 0);
-	      };
+	      this.setState({ src: file.preview });
 	    }
 	  }, {
 	    key: "onChange",
@@ -20481,10 +20450,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _dither = __webpack_require__(170);
-
-	var _dither2 = _interopRequireDefault(_dither);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20493,8 +20458,8 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var qrcode = __webpack_require__(171);
-	var halftoneQR = __webpack_require__(172);
+	var qrcode = __webpack_require__(170);
+	var colorQR = __webpack_require__(171);
 
 	var HalftoneQRCode = function (_React$Component) {
 	  _inherits(HalftoneQRCode, _React$Component);
@@ -20523,8 +20488,6 @@
 	      var _props = this.props;
 	      var src = _props.src;
 	      var text = _props.text;
-	      var colorLight = _props.colorLight;
-	      var colorDark = _props.colorDark;
 
 	      var img = new Image();
 	      img.src = src;
@@ -20568,7 +20531,11 @@
 	        controls.addData(text);
 	        controls.make(true);
 
-	        var halftoneQRArray = halftoneQR(qr.returnByteArray(), controls.returnByteArray());
+	        var _colorQR$limitTemplat = colorQR.limitTemplate(qr.returnByteArray(), controls.returnByteArray());
+
+	        var UlimitTemplate = _colorQR$limitTemplat.UlimitTemplate;
+	        var DlimitTemplate = _colorQR$limitTemplat.DlimitTemplate;
+
 
 	        var QRSize = QRsizes[QRversion - 1];
 
@@ -20582,13 +20549,8 @@
 	        ctx.fillRect(0, 0, c.width, c.height);
 	        ctx.drawImage(img, 0, 0, c.width, c.height);
 	        var imageData = ctx.getImageData(0, 0, c.width, c.height);
-	        imageData = (0, _dither2.default)(imageData);
+	        imageData = colorQR.limit(imageData, UlimitTemplate, DlimitTemplate);
 	        ctx.putImageData(imageData, 0, 0);
-
-	        //draw qrcode
-	        var qrc = drawArrayToCanvas(halftoneQRArray, colorLight, colorDark);
-	        ctx.imageSmoothingEnabled = false;
-	        ctx.drawImage(qrc, 0, 0, c.width, c.height);
 	      };
 	    }
 	  }, {
@@ -20605,132 +20567,14 @@
 
 	HalftoneQRCode.propTypes = {
 	  text: _react2.default.PropTypes.string.isRequired,
-	  src: _react2.default.PropTypes.string.isRequired,
-	  size: _react2.default.PropTypes.number,
-	  pixelSize: _react2.default.PropTypes.number,
-	  level: _react2.default.PropTypes.oneOf(['L', 'M', 'Q', 'H']),
-	  colorLight: _react2.default.PropTypes.string,
-	  colorDark: _react2.default.PropTypes.string
-	};
-	HalftoneQRCode.defaultProps = {
-	  pixelSize: 2,
-	  size: 246,
-	  level: "H",
-	  colorLight: "#FFFFFF",
-	  colorDark: "#000000"
+	  src: _react2.default.PropTypes.string.isRequired
 	};
 
 
-	function drawArrayToCanvas(arr, colorLight, colorDark) {
-	  var c = document.createElement('canvas');
-	  var size = arr.length;
-	  c.setAttribute('width', size);
-	  c.setAttribute('height', size);
-	  var ctx = c.getContext("2d");
-	  for (var i = 0; i < arr.length; i++) {
-	    for (var j = 0; j < arr.length; j++) {
-	      if (arr[i][j] === undefined) {
-	        continue;
-	      }
-	      if (arr[i][j] === true) {
-	        ctx.fillStyle = colorDark;
-	      } else {
-	        ctx.fillStyle = colorLight;
-	      }
-	      ctx.fillRect(i, j, 1, 1);
-	    }
-	  }
-	  return c;
-	}
 	module.exports = HalftoneQRCode;
 
 /***/ },
 /* 170 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	/*global self:true*/
-
-	// Atkinson thanks to https://github.com/ticky/canvas-dither/blob/master/canvas-image-worker.js
-	// Flickr's Atkinson was easy to understand but melted with some fps https://github.com/flickr/FlickrDithr/blob/master/dither.js
-	// Bayer parsed from http://en.wikipedia.org/wiki/Ordered_dithering
-
-	// var bayerMap = [
-	//   [  1,  9,  3, 11 ],
-	//   [ 13,  5, 15,  7 ],
-	//   [  4, 12,  2, 10 ],
-	//   [ 16,  8, 14,  6 ]
-	// ];
-
-	var bayerThresholdMap = [[15, 135, 45, 165], [195, 75, 225, 105], [60, 180, 30, 150], [240, 120, 210, 90]];
-
-	var lumR = [];
-	var lumG = [];
-	var lumB = [];
-	for (var i = 0; i < 256; i++) {
-	  lumR[i] = i * 0.299;
-	  lumG[i] = i * 0.587;
-	  lumB[i] = i * 0.114;
-	}
-
-	function monochrome(imageData, threshold, type) {
-
-	  var imageDataLength = imageData.data.length;
-
-	  // Greyscale luminance (sets r pixels to luminance of rgb)
-	  for (var i = 0; i <= imageDataLength; i += 4) {
-	    imageData.data[i] = Math.floor(lumR[imageData.data[i]] + lumG[imageData.data[i + 1]] + lumB[imageData.data[i + 2]]);
-	  }
-
-	  var w = imageData.width;
-	  var newPixel, err;
-
-	  for (var currentPixel = 0; currentPixel <= imageDataLength; currentPixel += 4) {
-
-	    if (type === "none") {
-	      // No dithering
-	      imageData.data[currentPixel] = imageData.data[currentPixel] < threshold ? 0 : 255;
-	    } else if (type === "bayer") {
-	      // 4x4 Bayer ordered dithering algorithm
-	      var x = currentPixel / 4 % w;
-	      var y = Math.floor(currentPixel / 4 / w);
-	      var map = Math.floor((imageData.data[currentPixel] + bayerThresholdMap[x % 4][y % 4]) / 2);
-	      imageData.data[currentPixel] = map < threshold ? 0 : 255;
-	    } else if (type === "floydsteinberg") {
-	      // Floyd–Steinberg dithering algorithm
-	      newPixel = imageData.data[currentPixel] < 129 ? 0 : 255;
-	      err = Math.floor((imageData.data[currentPixel] - newPixel) / 16);
-	      imageData.data[currentPixel] = newPixel;
-
-	      imageData.data[currentPixel + 4] += err * 7;
-	      imageData.data[currentPixel + 4 * w - 4] += err * 3;
-	      imageData.data[currentPixel + 4 * w] += err * 5;
-	      imageData.data[currentPixel + 4 * w + 4] += err * 1;
-	    } else {
-	      // Bill Atkinson's dithering algorithm
-	      newPixel = imageData.data[currentPixel] < 129 ? 0 : 255;
-	      err = Math.floor((imageData.data[currentPixel] - newPixel) / 8);
-	      imageData.data[currentPixel] = newPixel;
-
-	      imageData.data[currentPixel + 4] += err;
-	      imageData.data[currentPixel + 8] += err;
-	      imageData.data[currentPixel + 4 * w - 4] += err;
-	      imageData.data[currentPixel + 4 * w] += err;
-	      imageData.data[currentPixel + 4 * w + 4] += err;
-	      imageData.data[currentPixel + 8 * w] += err;
-	    }
-
-	    // Set g and b pixels equal to r
-	    imageData.data[currentPixel + 1] = imageData.data[currentPixel + 2] = imageData.data[currentPixel];
-	  }
-
-	  return imageData;
-	}
-	module.exports = monochrome;
-
-/***/ },
-/* 171 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21066,27 +20910,6 @@
 	      return data;
 	    };
 
-	    //fangjian
-	    var dataLength = function dataLength(typeNumber, errorCorrectLevel, dataList) {
-	      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
-
-	      var buffer = qrBitBuffer();
-
-	      for (var i = 0; i < dataList.length; i += 1) {
-	        var data = dataList[i];
-	        buffer.put(data.getMode(), 4);
-	        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber));
-	        data.write(buffer);
-	      }
-
-	      // calc num max data.
-	      var totalDataCount = 0;
-	      for (var i = 0; i < rsBlocks.length; i += 1) {
-	        totalDataCount += rsBlocks[i].dataCount;
-	      }
-	      return totalDataCount * 8;
-	    };
-
 	    var createData = function createData(typeNumber, errorCorrectLevel, dataList) {
 
 	      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
@@ -21221,10 +21044,6 @@
 	          return 1;
 	        }
 	      });
-	    };
-
-	    _this.len = function () {
-	      return dataLength(_typeNumber, _errorCorrectLevel, _dataList);
 	    };
 
 	    return _this;
@@ -22340,53 +22159,1324 @@
 	module.exports = qrcode;
 
 /***/ },
+/* 171 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var NGaussian = __webpack_require__(172);
+	var tinycolor = __webpack_require__(173);
+	module.exports = {
+	  limitTemplate: limitTemplate,
+	  limit: limit
+	};
+
+	function limitTemplate(qrBytes, ctlBytes) {
+	  var blockSize = arguments.length <= 2 || arguments[2] === undefined ? 6 : arguments[2];
+	  var d2 = arguments.length <= 3 || arguments[3] === undefined ? 1 : arguments[3];
+	  var minLightness = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
+	  var maxLightness = arguments.length <= 5 || arguments[5] === undefined ? 1 : arguments[5];
+
+	  var baseSize = qrBytes.length;
+	  var imageSize = baseSize * blockSize;
+	  var imageLength = imageSize * imageSize;
+	  var UlimitTemplate = new Array(imageLength); //上限模板，限定亮度的最大值，对应二维码黑色部分
+	  for (var i = 0; i < UlimitTemplate.length; i++) {
+	    UlimitTemplate[i] = 1;
+	  }
+	  var DlimitTemplate = new Array(imageLength); //下限模板，限定亮度的最小值，对应二维码白色部分
+	  for (var _i = 0; _i < DlimitTemplate.length; _i++) {
+	    DlimitTemplate[_i] = 0;
+	  }
+	  var idx2rowcol = function idx2rowcol(idx) {
+	    return { row: Math.floor(idx / imageSize), col: Math.floor(idx % imageSize) };
+	  };
+	  var rowcol2xy = function rowcol2xy(_ref) {
+	    var row = _ref.row;
+	    var col = _ref.col;
+	    return { x: Math.floor(col / 6), y: Math.floor(row / 6) };
+	  };
+	  var rowcol2dxdy = function rowcol2dxdy(_ref2) {
+	    var row = _ref2.row;
+	    var col = _ref2.col;
+	    return { dx: col % 6, dy: row % 6 };
+	  };
+	  var dxdy2didx = function dxdy2didx(_ref3) {
+	    var dx = _ref3.dx;
+	    var dy = _ref3.dy;
+	    return dy * blockSize + dx;
+	  };
+	  var DlimitBlockTemplate = buildDlimitBlockTemplate(blockSize, d2);
+	  var UlimitBlockTemplate = buildUlimitBlockTemplate(blockSize, d2);
+	  //构造上限模板
+	  for (var _i2 = 0; _i2 < imageLength; _i2++) {
+	    var _idx2rowcol = idx2rowcol(_i2);
+
+	    var row = _idx2rowcol.row;
+	    var col = _idx2rowcol.col; //大图中行列
+
+	    var _rowcol2xy = rowcol2xy({ row: row, col: col });
+
+	    var x = _rowcol2xy.x;
+	    var y = _rowcol2xy.y; //对应二维码数组中坐标
+
+	    if (ctlBytes[x][y] !== null) {
+	      //是控制块
+	      if (!ctlBytes[x][y]) {
+	        //白色
+	        DlimitTemplate[_i2] = maxLightness;
+	      } else {
+	        UlimitTemplate[_i2] = minLightness;
+	      }
+	    } else {
+	      //内容块
+
+	      var _rowcol2dxdy = rowcol2dxdy({ row: row, col: col });
+
+	      var dx = _rowcol2dxdy.dx;
+	      var dy = _rowcol2dxdy.dy; //在小块中的偏移
+
+	      var didx = dxdy2didx({ dx: dx, dy: dy });
+	      if (!qrBytes[x][y]) {
+	        //白色
+	        DlimitTemplate[_i2] = DlimitBlockTemplate[didx];
+	      } else {
+	        //黑色
+	        UlimitTemplate[_i2] = UlimitBlockTemplate[didx];
+	      }
+	    }
+	  }
+	  return { UlimitTemplate: UlimitTemplate, DlimitTemplate: DlimitTemplate };
+	}
+
+	function buildDlimitBlockTemplate(blockSize, d2) {
+	  var blockLength = blockSize * blockSize;
+	  var DlimitBlockTemplate = new Array(blockLength);
+	  var gs = NGaussian(d2);
+	  for (var x = 0; x < blockSize; x++) {
+	    for (var y = 0; y < blockSize; y++) {
+	      var idx = y * blockSize + x;
+	      var center = (blockSize - 1) / 2;
+	      var ux = Math.floor(Math.abs(x - center));
+	      var uy = Math.floor(Math.abs(y - center));
+	      var v = gs(ux, uy);
+	      DlimitBlockTemplate[idx] = v;
+	    }
+	  }
+	  return DlimitBlockTemplate;
+	}
+
+	function buildUlimitBlockTemplate(blockSize, d2) {
+	  var blockLength = blockSize * blockSize;
+	  var UlimitBlockTemplate = new Array(blockLength);
+	  var DlimitBlockTemplate = buildDlimitBlockTemplate(blockSize, d2);
+	  for (var i = 0; i < blockLength; i++) {
+	    UlimitBlockTemplate[i] = 1 - DlimitBlockTemplate[i];
+	  }
+	  return UlimitBlockTemplate;
+	}
+
+	function limit(imageData, UlimitTemplate, DlimitTemplate) {
+	  var imageDataLength = imageData.data.length;
+	  for (var i = 0; i <= imageDataLength; i += 4) {
+	    var color = tinycolor({ r: imageData.data[i], g: imageData.data[i + 1], b: imageData.data[i + 2], a: imageData.data[i + 3] });
+	    var hsl = color.toHsl();
+	    var idx = Math.floor(i / 4);
+	    if (hsl.l > UlimitTemplate[idx]) {
+	      hsl.l = UlimitTemplate[idx];
+	    } else if (hsl.l < DlimitTemplate[idx]) {
+	      hsl.l = DlimitTemplate[idx];
+	    }
+	    var rgb = tinycolor(hsl).toRgb();
+	    imageData.data[i] = rgb.r;
+	    imageData.data[i + 1] = rgb.g;
+	    imageData.data[i + 2] = rgb.b;
+	  }
+	  return imageData;
+	}
+
+/***/ },
 /* 172 */
 /***/ function(module, exports) {
 
 	"use strict";
 
-	//original version By Lachlan  http://lach.la/
-	//modified by Fang Jian https://github.com/fangj
-
-	function halftoneQR(QRBytes, controlBytes) {
-	    var halftoneImageSize = QRBytes.length * 3;
-	    var i, j;
-
-	    var halftoneImageArray = new Array(halftoneImageSize);
-	    for (i = 0; i < halftoneImageSize; i++) {
-	        halftoneImageArray[i] = new Array(halftoneImageSize);
-	    }
-
-	    for (i = 0; i < QRBytes.length; i++) {
-	        for (j = 0; j < QRBytes[i].length; j++) {
-	            // Middle Cell
-	            halftoneImageArray[i * 3 + 1][j * 3 + 1] = QRBytes[i][j];
-	        }
-	    }
-
-	    // Re-draw control bytes
-	    for (i = 0; i < controlBytes.length; i++) {
-	        for (j = 0; j < controlBytes[i].length; j++) {
-	            var point = controlBytes[i][j];
-	            if (point !== null) {
-	                halftoneImageArray[i * 3 + 0][j * 3 + 0] = point;
-	                halftoneImageArray[i * 3 + 0][j * 3 + 1] = point;
-	                halftoneImageArray[i * 3 + 0][j * 3 + 2] = point;
-	                halftoneImageArray[i * 3 + 1][j * 3 + 0] = point;
-	                halftoneImageArray[i * 3 + 1][j * 3 + 1] = point;
-	                halftoneImageArray[i * 3 + 1][j * 3 + 2] = point;
-	                halftoneImageArray[i * 3 + 2][j * 3 + 0] = point;
-	                halftoneImageArray[i * 3 + 2][j * 3 + 1] = point;
-	                halftoneImageArray[i * 3 + 2][j * 3 + 2] = point;
-	            }
-	        }
-	    }
-	    return halftoneImageArray;
+	function NGaussian(d2) {
+	  return function (x, y) {
+	    return Math.pow(Math.E, -(x * x + y * y) / d2);
+	  };
 	}
-	module.exports = halftoneQR;
+
+	module.exports = NGaussian;
 
 /***/ },
 /* 173 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	// TinyColor v1.3.0
+	// https://github.com/bgrins/TinyColor
+	// Brian Grinstead, MIT License
+
+	(function () {
+
+	    var trimLeft = /^\s+/,
+	        trimRight = /\s+$/,
+	        tinyCounter = 0,
+	        math = Math,
+	        mathRound = math.round,
+	        mathMin = math.min,
+	        mathMax = math.max,
+	        mathRandom = math.random;
+
+	    function tinycolor(color, opts) {
+
+	        color = color ? color : '';
+	        opts = opts || {};
+
+	        // If input is already a tinycolor, return itself
+	        if (color instanceof tinycolor) {
+	            return color;
+	        }
+	        // If we are called as a function, call using new instead
+	        if (!(this instanceof tinycolor)) {
+	            return new tinycolor(color, opts);
+	        }
+
+	        var rgb = inputToRGB(color);
+	        this._originalInput = color, this._r = rgb.r, this._g = rgb.g, this._b = rgb.b, this._a = rgb.a, this._roundA = mathRound(100 * this._a) / 100, this._format = opts.format || rgb.format;
+	        this._gradientType = opts.gradientType;
+
+	        // Don't let the range of [0,255] come back in [0,1].
+	        // Potentially lose a little bit of precision here, but will fix issues where
+	        // .5 gets interpreted as half of the total, instead of half of 1
+	        // If it was supposed to be 128, this was already taken care of by `inputToRgb`
+	        if (this._r < 1) {
+	            this._r = mathRound(this._r);
+	        }
+	        if (this._g < 1) {
+	            this._g = mathRound(this._g);
+	        }
+	        if (this._b < 1) {
+	            this._b = mathRound(this._b);
+	        }
+
+	        this._ok = rgb.ok;
+	        this._tc_id = tinyCounter++;
+	    }
+
+	    tinycolor.prototype = {
+	        isDark: function isDark() {
+	            return this.getBrightness() < 128;
+	        },
+	        isLight: function isLight() {
+	            return !this.isDark();
+	        },
+	        isValid: function isValid() {
+	            return this._ok;
+	        },
+	        getOriginalInput: function getOriginalInput() {
+	            return this._originalInput;
+	        },
+	        getFormat: function getFormat() {
+	            return this._format;
+	        },
+	        getAlpha: function getAlpha() {
+	            return this._a;
+	        },
+	        getBrightness: function getBrightness() {
+	            //http://www.w3.org/TR/AERT#color-contrast
+	            var rgb = this.toRgb();
+	            return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+	        },
+	        getLuminance: function getLuminance() {
+	            //http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+	            var rgb = this.toRgb();
+	            var RsRGB, GsRGB, BsRGB, R, G, B;
+	            RsRGB = rgb.r / 255;
+	            GsRGB = rgb.g / 255;
+	            BsRGB = rgb.b / 255;
+
+	            if (RsRGB <= 0.03928) {
+	                R = RsRGB / 12.92;
+	            } else {
+	                R = Math.pow((RsRGB + 0.055) / 1.055, 2.4);
+	            }
+	            if (GsRGB <= 0.03928) {
+	                G = GsRGB / 12.92;
+	            } else {
+	                G = Math.pow((GsRGB + 0.055) / 1.055, 2.4);
+	            }
+	            if (BsRGB <= 0.03928) {
+	                B = BsRGB / 12.92;
+	            } else {
+	                B = Math.pow((BsRGB + 0.055) / 1.055, 2.4);
+	            }
+	            return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+	        },
+	        setAlpha: function setAlpha(value) {
+	            this._a = boundAlpha(value);
+	            this._roundA = mathRound(100 * this._a) / 100;
+	            return this;
+	        },
+	        toHsv: function toHsv() {
+	            var hsv = rgbToHsv(this._r, this._g, this._b);
+	            return { h: hsv.h * 360, s: hsv.s, v: hsv.v, a: this._a };
+	        },
+	        toHsvString: function toHsvString() {
+	            var hsv = rgbToHsv(this._r, this._g, this._b);
+	            var h = mathRound(hsv.h * 360),
+	                s = mathRound(hsv.s * 100),
+	                v = mathRound(hsv.v * 100);
+	            return this._a == 1 ? "hsv(" + h + ", " + s + "%, " + v + "%)" : "hsva(" + h + ", " + s + "%, " + v + "%, " + this._roundA + ")";
+	        },
+	        toHsl: function toHsl() {
+	            var hsl = rgbToHsl(this._r, this._g, this._b);
+	            return { h: hsl.h * 360, s: hsl.s, l: hsl.l, a: this._a };
+	        },
+	        toHslString: function toHslString() {
+	            var hsl = rgbToHsl(this._r, this._g, this._b);
+	            var h = mathRound(hsl.h * 360),
+	                s = mathRound(hsl.s * 100),
+	                l = mathRound(hsl.l * 100);
+	            return this._a == 1 ? "hsl(" + h + ", " + s + "%, " + l + "%)" : "hsla(" + h + ", " + s + "%, " + l + "%, " + this._roundA + ")";
+	        },
+	        toHex: function toHex(allow3Char) {
+	            return rgbToHex(this._r, this._g, this._b, allow3Char);
+	        },
+	        toHexString: function toHexString(allow3Char) {
+	            return '#' + this.toHex(allow3Char);
+	        },
+	        toHex8: function toHex8() {
+	            return rgbaToHex(this._r, this._g, this._b, this._a);
+	        },
+	        toHex8String: function toHex8String() {
+	            return '#' + this.toHex8();
+	        },
+	        toRgb: function toRgb() {
+	            return { r: mathRound(this._r), g: mathRound(this._g), b: mathRound(this._b), a: this._a };
+	        },
+	        toRgbString: function toRgbString() {
+	            return this._a == 1 ? "rgb(" + mathRound(this._r) + ", " + mathRound(this._g) + ", " + mathRound(this._b) + ")" : "rgba(" + mathRound(this._r) + ", " + mathRound(this._g) + ", " + mathRound(this._b) + ", " + this._roundA + ")";
+	        },
+	        toPercentageRgb: function toPercentageRgb() {
+	            return { r: mathRound(bound01(this._r, 255) * 100) + "%", g: mathRound(bound01(this._g, 255) * 100) + "%", b: mathRound(bound01(this._b, 255) * 100) + "%", a: this._a };
+	        },
+	        toPercentageRgbString: function toPercentageRgbString() {
+	            return this._a == 1 ? "rgb(" + mathRound(bound01(this._r, 255) * 100) + "%, " + mathRound(bound01(this._g, 255) * 100) + "%, " + mathRound(bound01(this._b, 255) * 100) + "%)" : "rgba(" + mathRound(bound01(this._r, 255) * 100) + "%, " + mathRound(bound01(this._g, 255) * 100) + "%, " + mathRound(bound01(this._b, 255) * 100) + "%, " + this._roundA + ")";
+	        },
+	        toName: function toName() {
+	            if (this._a === 0) {
+	                return "transparent";
+	            }
+
+	            if (this._a < 1) {
+	                return false;
+	            }
+
+	            return hexNames[rgbToHex(this._r, this._g, this._b, true)] || false;
+	        },
+	        toFilter: function toFilter(secondColor) {
+	            var hex8String = '#' + rgbaToHex(this._r, this._g, this._b, this._a);
+	            var secondHex8String = hex8String;
+	            var gradientType = this._gradientType ? "GradientType = 1, " : "";
+
+	            if (secondColor) {
+	                var s = tinycolor(secondColor);
+	                secondHex8String = s.toHex8String();
+	            }
+
+	            return "progid:DXImageTransform.Microsoft.gradient(" + gradientType + "startColorstr=" + hex8String + ",endColorstr=" + secondHex8String + ")";
+	        },
+	        toString: function toString(format) {
+	            var formatSet = !!format;
+	            format = format || this._format;
+
+	            var formattedString = false;
+	            var hasAlpha = this._a < 1 && this._a >= 0;
+	            var needsAlphaFormat = !formatSet && hasAlpha && (format === "hex" || format === "hex6" || format === "hex3" || format === "name");
+
+	            if (needsAlphaFormat) {
+	                // Special case for "transparent", all other non-alpha formats
+	                // will return rgba when there is transparency.
+	                if (format === "name" && this._a === 0) {
+	                    return this.toName();
+	                }
+	                return this.toRgbString();
+	            }
+	            if (format === "rgb") {
+	                formattedString = this.toRgbString();
+	            }
+	            if (format === "prgb") {
+	                formattedString = this.toPercentageRgbString();
+	            }
+	            if (format === "hex" || format === "hex6") {
+	                formattedString = this.toHexString();
+	            }
+	            if (format === "hex3") {
+	                formattedString = this.toHexString(true);
+	            }
+	            if (format === "hex8") {
+	                formattedString = this.toHex8String();
+	            }
+	            if (format === "name") {
+	                formattedString = this.toName();
+	            }
+	            if (format === "hsl") {
+	                formattedString = this.toHslString();
+	            }
+	            if (format === "hsv") {
+	                formattedString = this.toHsvString();
+	            }
+
+	            return formattedString || this.toHexString();
+	        },
+	        clone: function clone() {
+	            return tinycolor(this.toString());
+	        },
+
+	        _applyModification: function _applyModification(fn, args) {
+	            var color = fn.apply(null, [this].concat([].slice.call(args)));
+	            this._r = color._r;
+	            this._g = color._g;
+	            this._b = color._b;
+	            this.setAlpha(color._a);
+	            return this;
+	        },
+	        lighten: function lighten() {
+	            return this._applyModification(_lighten, arguments);
+	        },
+	        brighten: function brighten() {
+	            return this._applyModification(_brighten, arguments);
+	        },
+	        darken: function darken() {
+	            return this._applyModification(_darken, arguments);
+	        },
+	        desaturate: function desaturate() {
+	            return this._applyModification(_desaturate, arguments);
+	        },
+	        saturate: function saturate() {
+	            return this._applyModification(_saturate, arguments);
+	        },
+	        greyscale: function greyscale() {
+	            return this._applyModification(_greyscale, arguments);
+	        },
+	        spin: function spin() {
+	            return this._applyModification(_spin, arguments);
+	        },
+
+	        _applyCombination: function _applyCombination(fn, args) {
+	            return fn.apply(null, [this].concat([].slice.call(args)));
+	        },
+	        analogous: function analogous() {
+	            return this._applyCombination(_analogous, arguments);
+	        },
+	        complement: function complement() {
+	            return this._applyCombination(_complement, arguments);
+	        },
+	        monochromatic: function monochromatic() {
+	            return this._applyCombination(_monochromatic, arguments);
+	        },
+	        splitcomplement: function splitcomplement() {
+	            return this._applyCombination(_splitcomplement, arguments);
+	        },
+	        triad: function triad() {
+	            return this._applyCombination(_triad, arguments);
+	        },
+	        tetrad: function tetrad() {
+	            return this._applyCombination(_tetrad, arguments);
+	        }
+	    };
+
+	    // If input is an object, force 1 into "1.0" to handle ratios properly
+	    // String input requires "1.0" as input, so 1 will be treated as 1
+	    tinycolor.fromRatio = function (color, opts) {
+	        if ((typeof color === "undefined" ? "undefined" : _typeof(color)) == "object") {
+	            var newColor = {};
+	            for (var i in color) {
+	                if (color.hasOwnProperty(i)) {
+	                    if (i === "a") {
+	                        newColor[i] = color[i];
+	                    } else {
+	                        newColor[i] = convertToPercentage(color[i]);
+	                    }
+	                }
+	            }
+	            color = newColor;
+	        }
+
+	        return tinycolor(color, opts);
+	    };
+
+	    // Given a string or object, convert that input to RGB
+	    // Possible string inputs:
+	    //
+	    //     "red"
+	    //     "#f00" or "f00"
+	    //     "#ff0000" or "ff0000"
+	    //     "#ff000000" or "ff000000"
+	    //     "rgb 255 0 0" or "rgb (255, 0, 0)"
+	    //     "rgb 1.0 0 0" or "rgb (1, 0, 0)"
+	    //     "rgba (255, 0, 0, 1)" or "rgba 255, 0, 0, 1"
+	    //     "rgba (1.0, 0, 0, 1)" or "rgba 1.0, 0, 0, 1"
+	    //     "hsl(0, 100%, 50%)" or "hsl 0 100% 50%"
+	    //     "hsla(0, 100%, 50%, 1)" or "hsla 0 100% 50%, 1"
+	    //     "hsv(0, 100%, 100%)" or "hsv 0 100% 100%"
+	    //
+	    function inputToRGB(color) {
+
+	        var rgb = { r: 0, g: 0, b: 0 };
+	        var a = 1;
+	        var ok = false;
+	        var format = false;
+
+	        if (typeof color == "string") {
+	            color = stringInputToObject(color);
+	        }
+
+	        if ((typeof color === "undefined" ? "undefined" : _typeof(color)) == "object") {
+	            if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
+	                rgb = rgbToRgb(color.r, color.g, color.b);
+	                ok = true;
+	                format = String(color.r).substr(-1) === "%" ? "prgb" : "rgb";
+	            } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
+	                color.s = convertToPercentage(color.s);
+	                color.v = convertToPercentage(color.v);
+	                rgb = hsvToRgb(color.h, color.s, color.v);
+	                ok = true;
+	                format = "hsv";
+	            } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("l")) {
+	                color.s = convertToPercentage(color.s);
+	                color.l = convertToPercentage(color.l);
+	                rgb = hslToRgb(color.h, color.s, color.l);
+	                ok = true;
+	                format = "hsl";
+	            }
+
+	            if (color.hasOwnProperty("a")) {
+	                a = color.a;
+	            }
+	        }
+
+	        a = boundAlpha(a);
+
+	        return {
+	            ok: ok,
+	            format: color.format || format,
+	            r: mathMin(255, mathMax(rgb.r, 0)),
+	            g: mathMin(255, mathMax(rgb.g, 0)),
+	            b: mathMin(255, mathMax(rgb.b, 0)),
+	            a: a
+	        };
+	    }
+
+	    // Conversion Functions
+	    // --------------------
+
+	    // `rgbToHsl`, `rgbToHsv`, `hslToRgb`, `hsvToRgb` modified from:
+	    // <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
+
+	    // `rgbToRgb`
+	    // Handle bounds / percentage checking to conform to CSS color spec
+	    // <http://www.w3.org/TR/css3-color/>
+	    // *Assumes:* r, g, b in [0, 255] or [0, 1]
+	    // *Returns:* { r, g, b } in [0, 255]
+	    function rgbToRgb(r, g, b) {
+	        return {
+	            r: bound01(r, 255) * 255,
+	            g: bound01(g, 255) * 255,
+	            b: bound01(b, 255) * 255
+	        };
+	    }
+
+	    // `rgbToHsl`
+	    // Converts an RGB color value to HSL.
+	    // *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
+	    // *Returns:* { h, s, l } in [0,1]
+	    function rgbToHsl(r, g, b) {
+
+	        r = bound01(r, 255);
+	        g = bound01(g, 255);
+	        b = bound01(b, 255);
+
+	        var max = mathMax(r, g, b),
+	            min = mathMin(r, g, b);
+	        var h,
+	            s,
+	            l = (max + min) / 2;
+
+	        if (max == min) {
+	            h = s = 0; // achromatic
+	        } else {
+	                var d = max - min;
+	                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+	                switch (max) {
+	                    case r:
+	                        h = (g - b) / d + (g < b ? 6 : 0);break;
+	                    case g:
+	                        h = (b - r) / d + 2;break;
+	                    case b:
+	                        h = (r - g) / d + 4;break;
+	                }
+
+	                h /= 6;
+	            }
+
+	        return { h: h, s: s, l: l };
+	    }
+
+	    // `hslToRgb`
+	    // Converts an HSL color value to RGB.
+	    // *Assumes:* h is contained in [0, 1] or [0, 360] and s and l are contained [0, 1] or [0, 100]
+	    // *Returns:* { r, g, b } in the set [0, 255]
+	    function hslToRgb(h, s, l) {
+	        var r, g, b;
+
+	        h = bound01(h, 360);
+	        s = bound01(s, 100);
+	        l = bound01(l, 100);
+
+	        function hue2rgb(p, q, t) {
+	            if (t < 0) t += 1;
+	            if (t > 1) t -= 1;
+	            if (t < 1 / 6) return p + (q - p) * 6 * t;
+	            if (t < 1 / 2) return q;
+	            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+	            return p;
+	        }
+
+	        if (s === 0) {
+	            r = g = b = l; // achromatic
+	        } else {
+	                var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+	                var p = 2 * l - q;
+	                r = hue2rgb(p, q, h + 1 / 3);
+	                g = hue2rgb(p, q, h);
+	                b = hue2rgb(p, q, h - 1 / 3);
+	            }
+
+	        return { r: r * 255, g: g * 255, b: b * 255 };
+	    }
+
+	    // `rgbToHsv`
+	    // Converts an RGB color value to HSV
+	    // *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
+	    // *Returns:* { h, s, v } in [0,1]
+	    function rgbToHsv(r, g, b) {
+
+	        r = bound01(r, 255);
+	        g = bound01(g, 255);
+	        b = bound01(b, 255);
+
+	        var max = mathMax(r, g, b),
+	            min = mathMin(r, g, b);
+	        var h,
+	            s,
+	            v = max;
+
+	        var d = max - min;
+	        s = max === 0 ? 0 : d / max;
+
+	        if (max == min) {
+	            h = 0; // achromatic
+	        } else {
+	                switch (max) {
+	                    case r:
+	                        h = (g - b) / d + (g < b ? 6 : 0);break;
+	                    case g:
+	                        h = (b - r) / d + 2;break;
+	                    case b:
+	                        h = (r - g) / d + 4;break;
+	                }
+	                h /= 6;
+	            }
+	        return { h: h, s: s, v: v };
+	    }
+
+	    // `hsvToRgb`
+	    // Converts an HSV color value to RGB.
+	    // *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
+	    // *Returns:* { r, g, b } in the set [0, 255]
+	    function hsvToRgb(h, s, v) {
+
+	        h = bound01(h, 360) * 6;
+	        s = bound01(s, 100);
+	        v = bound01(v, 100);
+
+	        var i = math.floor(h),
+	            f = h - i,
+	            p = v * (1 - s),
+	            q = v * (1 - f * s),
+	            t = v * (1 - (1 - f) * s),
+	            mod = i % 6,
+	            r = [v, q, p, p, t, v][mod],
+	            g = [t, v, v, q, p, p][mod],
+	            b = [p, p, t, v, v, q][mod];
+
+	        return { r: r * 255, g: g * 255, b: b * 255 };
+	    }
+
+	    // `rgbToHex`
+	    // Converts an RGB color to hex
+	    // Assumes r, g, and b are contained in the set [0, 255]
+	    // Returns a 3 or 6 character hex
+	    function rgbToHex(r, g, b, allow3Char) {
+
+	        var hex = [pad2(mathRound(r).toString(16)), pad2(mathRound(g).toString(16)), pad2(mathRound(b).toString(16))];
+
+	        // Return a 3 character hex if possible
+	        if (allow3Char && hex[0].charAt(0) == hex[0].charAt(1) && hex[1].charAt(0) == hex[1].charAt(1) && hex[2].charAt(0) == hex[2].charAt(1)) {
+	            return hex[0].charAt(0) + hex[1].charAt(0) + hex[2].charAt(0);
+	        }
+
+	        return hex.join("");
+	    }
+
+	    // `rgbaToHex`
+	    // Converts an RGBA color plus alpha transparency to hex
+	    // Assumes r, g, b and a are contained in the set [0, 255]
+	    // Returns an 8 character hex
+	    function rgbaToHex(r, g, b, a) {
+
+	        var hex = [pad2(convertDecimalToHex(a)), pad2(mathRound(r).toString(16)), pad2(mathRound(g).toString(16)), pad2(mathRound(b).toString(16))];
+
+	        return hex.join("");
+	    }
+
+	    // `equals`
+	    // Can be called with any tinycolor input
+	    tinycolor.equals = function (color1, color2) {
+	        if (!color1 || !color2) {
+	            return false;
+	        }
+	        return tinycolor(color1).toRgbString() == tinycolor(color2).toRgbString();
+	    };
+
+	    tinycolor.random = function () {
+	        return tinycolor.fromRatio({
+	            r: mathRandom(),
+	            g: mathRandom(),
+	            b: mathRandom()
+	        });
+	    };
+
+	    // Modification Functions
+	    // ----------------------
+	    // Thanks to less.js for some of the basics here
+	    // <https://github.com/cloudhead/less.js/blob/master/lib/less/functions.js>
+
+	    function _desaturate(color, amount) {
+	        amount = amount === 0 ? 0 : amount || 10;
+	        var hsl = tinycolor(color).toHsl();
+	        hsl.s -= amount / 100;
+	        hsl.s = clamp01(hsl.s);
+	        return tinycolor(hsl);
+	    }
+
+	    function _saturate(color, amount) {
+	        amount = amount === 0 ? 0 : amount || 10;
+	        var hsl = tinycolor(color).toHsl();
+	        hsl.s += amount / 100;
+	        hsl.s = clamp01(hsl.s);
+	        return tinycolor(hsl);
+	    }
+
+	    function _greyscale(color) {
+	        return tinycolor(color).desaturate(100);
+	    }
+
+	    function _lighten(color, amount) {
+	        amount = amount === 0 ? 0 : amount || 10;
+	        var hsl = tinycolor(color).toHsl();
+	        hsl.l += amount / 100;
+	        hsl.l = clamp01(hsl.l);
+	        return tinycolor(hsl);
+	    }
+
+	    function _brighten(color, amount) {
+	        amount = amount === 0 ? 0 : amount || 10;
+	        var rgb = tinycolor(color).toRgb();
+	        rgb.r = mathMax(0, mathMin(255, rgb.r - mathRound(255 * -(amount / 100))));
+	        rgb.g = mathMax(0, mathMin(255, rgb.g - mathRound(255 * -(amount / 100))));
+	        rgb.b = mathMax(0, mathMin(255, rgb.b - mathRound(255 * -(amount / 100))));
+	        return tinycolor(rgb);
+	    }
+
+	    function _darken(color, amount) {
+	        amount = amount === 0 ? 0 : amount || 10;
+	        var hsl = tinycolor(color).toHsl();
+	        hsl.l -= amount / 100;
+	        hsl.l = clamp01(hsl.l);
+	        return tinycolor(hsl);
+	    }
+
+	    // Spin takes a positive or negative amount within [-360, 360] indicating the change of hue.
+	    // Values outside of this range will be wrapped into this range.
+	    function _spin(color, amount) {
+	        var hsl = tinycolor(color).toHsl();
+	        var hue = (mathRound(hsl.h) + amount) % 360;
+	        hsl.h = hue < 0 ? 360 + hue : hue;
+	        return tinycolor(hsl);
+	    }
+
+	    // Combination Functions
+	    // ---------------------
+	    // Thanks to jQuery xColor for some of the ideas behind these
+	    // <https://github.com/infusion/jQuery-xcolor/blob/master/jquery.xcolor.js>
+
+	    function _complement(color) {
+	        var hsl = tinycolor(color).toHsl();
+	        hsl.h = (hsl.h + 180) % 360;
+	        return tinycolor(hsl);
+	    }
+
+	    function _triad(color) {
+	        var hsl = tinycolor(color).toHsl();
+	        var h = hsl.h;
+	        return [tinycolor(color), tinycolor({ h: (h + 120) % 360, s: hsl.s, l: hsl.l }), tinycolor({ h: (h + 240) % 360, s: hsl.s, l: hsl.l })];
+	    }
+
+	    function _tetrad(color) {
+	        var hsl = tinycolor(color).toHsl();
+	        var h = hsl.h;
+	        return [tinycolor(color), tinycolor({ h: (h + 90) % 360, s: hsl.s, l: hsl.l }), tinycolor({ h: (h + 180) % 360, s: hsl.s, l: hsl.l }), tinycolor({ h: (h + 270) % 360, s: hsl.s, l: hsl.l })];
+	    }
+
+	    function _splitcomplement(color) {
+	        var hsl = tinycolor(color).toHsl();
+	        var h = hsl.h;
+	        return [tinycolor(color), tinycolor({ h: (h + 72) % 360, s: hsl.s, l: hsl.l }), tinycolor({ h: (h + 216) % 360, s: hsl.s, l: hsl.l })];
+	    }
+
+	    function _analogous(color, results, slices) {
+	        results = results || 6;
+	        slices = slices || 30;
+
+	        var hsl = tinycolor(color).toHsl();
+	        var part = 360 / slices;
+	        var ret = [tinycolor(color)];
+
+	        for (hsl.h = (hsl.h - (part * results >> 1) + 720) % 360; --results;) {
+	            hsl.h = (hsl.h + part) % 360;
+	            ret.push(tinycolor(hsl));
+	        }
+	        return ret;
+	    }
+
+	    function _monochromatic(color, results) {
+	        results = results || 6;
+	        var hsv = tinycolor(color).toHsv();
+	        var h = hsv.h,
+	            s = hsv.s,
+	            v = hsv.v;
+	        var ret = [];
+	        var modification = 1 / results;
+
+	        while (results--) {
+	            ret.push(tinycolor({ h: h, s: s, v: v }));
+	            v = (v + modification) % 1;
+	        }
+
+	        return ret;
+	    }
+
+	    // Utility Functions
+	    // ---------------------
+
+	    tinycolor.mix = function (color1, color2, amount) {
+	        amount = amount === 0 ? 0 : amount || 50;
+
+	        var rgb1 = tinycolor(color1).toRgb();
+	        var rgb2 = tinycolor(color2).toRgb();
+
+	        var p = amount / 100;
+	        var w = p * 2 - 1;
+	        var a = rgb2.a - rgb1.a;
+
+	        var w1;
+
+	        if (w * a == -1) {
+	            w1 = w;
+	        } else {
+	            w1 = (w + a) / (1 + w * a);
+	        }
+
+	        w1 = (w1 + 1) / 2;
+
+	        var w2 = 1 - w1;
+
+	        var rgba = {
+	            r: rgb2.r * w1 + rgb1.r * w2,
+	            g: rgb2.g * w1 + rgb1.g * w2,
+	            b: rgb2.b * w1 + rgb1.b * w2,
+	            a: rgb2.a * p + rgb1.a * (1 - p)
+	        };
+
+	        return tinycolor(rgba);
+	    };
+
+	    // Readability Functions
+	    // ---------------------
+	    // <http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef (WCAG Version 2)
+
+	    // `contrast`
+	    // Analyze the 2 colors and returns the color contrast defined by (WCAG Version 2)
+	    tinycolor.readability = function (color1, color2) {
+	        var c1 = tinycolor(color1);
+	        var c2 = tinycolor(color2);
+	        return (Math.max(c1.getLuminance(), c2.getLuminance()) + 0.05) / (Math.min(c1.getLuminance(), c2.getLuminance()) + 0.05);
+	    };
+
+	    // `isReadable`
+	    // Ensure that foreground and background color combinations meet WCAG2 guidelines.
+	    // The third argument is an optional Object.
+	    //      the 'level' property states 'AA' or 'AAA' - if missing or invalid, it defaults to 'AA';
+	    //      the 'size' property states 'large' or 'small' - if missing or invalid, it defaults to 'small'.
+	    // If the entire object is absent, isReadable defaults to {level:"AA",size:"small"}.
+
+	    // *Example*
+	    //    tinycolor.isReadable("#000", "#111") => false
+	    //    tinycolor.isReadable("#000", "#111",{level:"AA",size:"large"}) => false
+	    tinycolor.isReadable = function (color1, color2, wcag2) {
+	        var readability = tinycolor.readability(color1, color2);
+	        var wcag2Parms, out;
+
+	        out = false;
+
+	        wcag2Parms = validateWCAG2Parms(wcag2);
+	        switch (wcag2Parms.level + wcag2Parms.size) {
+	            case "AAsmall":
+	            case "AAAlarge":
+	                out = readability >= 4.5;
+	                break;
+	            case "AAlarge":
+	                out = readability >= 3;
+	                break;
+	            case "AAAsmall":
+	                out = readability >= 7;
+	                break;
+	        }
+	        return out;
+	    };
+
+	    // `mostReadable`
+	    // Given a base color and a list of possible foreground or background
+	    // colors for that base, returns the most readable color.
+	    // Optionally returns Black or White if the most readable color is unreadable.
+	    // *Example*
+	    //    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:false}).toHexString(); // "#112255"
+	    //    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:true}).toHexString();  // "#ffffff"
+	    //    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"large"}).toHexString(); // "#faf3f3"
+	    //    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"small"}).toHexString(); // "#ffffff"
+	    tinycolor.mostReadable = function (baseColor, colorList, args) {
+	        var bestColor = null;
+	        var bestScore = 0;
+	        var readability;
+	        var includeFallbackColors, level, size;
+	        args = args || {};
+	        includeFallbackColors = args.includeFallbackColors;
+	        level = args.level;
+	        size = args.size;
+
+	        for (var i = 0; i < colorList.length; i++) {
+	            readability = tinycolor.readability(baseColor, colorList[i]);
+	            if (readability > bestScore) {
+	                bestScore = readability;
+	                bestColor = tinycolor(colorList[i]);
+	            }
+	        }
+
+	        if (tinycolor.isReadable(baseColor, bestColor, { "level": level, "size": size }) || !includeFallbackColors) {
+	            return bestColor;
+	        } else {
+	            args.includeFallbackColors = false;
+	            return tinycolor.mostReadable(baseColor, ["#fff", "#000"], args);
+	        }
+	    };
+
+	    // Big List of Colors
+	    // ------------------
+	    // <http://www.w3.org/TR/css3-color/#svg-color>
+	    var names = tinycolor.names = {
+	        aliceblue: "f0f8ff",
+	        antiquewhite: "faebd7",
+	        aqua: "0ff",
+	        aquamarine: "7fffd4",
+	        azure: "f0ffff",
+	        beige: "f5f5dc",
+	        bisque: "ffe4c4",
+	        black: "000",
+	        blanchedalmond: "ffebcd",
+	        blue: "00f",
+	        blueviolet: "8a2be2",
+	        brown: "a52a2a",
+	        burlywood: "deb887",
+	        burntsienna: "ea7e5d",
+	        cadetblue: "5f9ea0",
+	        chartreuse: "7fff00",
+	        chocolate: "d2691e",
+	        coral: "ff7f50",
+	        cornflowerblue: "6495ed",
+	        cornsilk: "fff8dc",
+	        crimson: "dc143c",
+	        cyan: "0ff",
+	        darkblue: "00008b",
+	        darkcyan: "008b8b",
+	        darkgoldenrod: "b8860b",
+	        darkgray: "a9a9a9",
+	        darkgreen: "006400",
+	        darkgrey: "a9a9a9",
+	        darkkhaki: "bdb76b",
+	        darkmagenta: "8b008b",
+	        darkolivegreen: "556b2f",
+	        darkorange: "ff8c00",
+	        darkorchid: "9932cc",
+	        darkred: "8b0000",
+	        darksalmon: "e9967a",
+	        darkseagreen: "8fbc8f",
+	        darkslateblue: "483d8b",
+	        darkslategray: "2f4f4f",
+	        darkslategrey: "2f4f4f",
+	        darkturquoise: "00ced1",
+	        darkviolet: "9400d3",
+	        deeppink: "ff1493",
+	        deepskyblue: "00bfff",
+	        dimgray: "696969",
+	        dimgrey: "696969",
+	        dodgerblue: "1e90ff",
+	        firebrick: "b22222",
+	        floralwhite: "fffaf0",
+	        forestgreen: "228b22",
+	        fuchsia: "f0f",
+	        gainsboro: "dcdcdc",
+	        ghostwhite: "f8f8ff",
+	        gold: "ffd700",
+	        goldenrod: "daa520",
+	        gray: "808080",
+	        green: "008000",
+	        greenyellow: "adff2f",
+	        grey: "808080",
+	        honeydew: "f0fff0",
+	        hotpink: "ff69b4",
+	        indianred: "cd5c5c",
+	        indigo: "4b0082",
+	        ivory: "fffff0",
+	        khaki: "f0e68c",
+	        lavender: "e6e6fa",
+	        lavenderblush: "fff0f5",
+	        lawngreen: "7cfc00",
+	        lemonchiffon: "fffacd",
+	        lightblue: "add8e6",
+	        lightcoral: "f08080",
+	        lightcyan: "e0ffff",
+	        lightgoldenrodyellow: "fafad2",
+	        lightgray: "d3d3d3",
+	        lightgreen: "90ee90",
+	        lightgrey: "d3d3d3",
+	        lightpink: "ffb6c1",
+	        lightsalmon: "ffa07a",
+	        lightseagreen: "20b2aa",
+	        lightskyblue: "87cefa",
+	        lightslategray: "789",
+	        lightslategrey: "789",
+	        lightsteelblue: "b0c4de",
+	        lightyellow: "ffffe0",
+	        lime: "0f0",
+	        limegreen: "32cd32",
+	        linen: "faf0e6",
+	        magenta: "f0f",
+	        maroon: "800000",
+	        mediumaquamarine: "66cdaa",
+	        mediumblue: "0000cd",
+	        mediumorchid: "ba55d3",
+	        mediumpurple: "9370db",
+	        mediumseagreen: "3cb371",
+	        mediumslateblue: "7b68ee",
+	        mediumspringgreen: "00fa9a",
+	        mediumturquoise: "48d1cc",
+	        mediumvioletred: "c71585",
+	        midnightblue: "191970",
+	        mintcream: "f5fffa",
+	        mistyrose: "ffe4e1",
+	        moccasin: "ffe4b5",
+	        navajowhite: "ffdead",
+	        navy: "000080",
+	        oldlace: "fdf5e6",
+	        olive: "808000",
+	        olivedrab: "6b8e23",
+	        orange: "ffa500",
+	        orangered: "ff4500",
+	        orchid: "da70d6",
+	        palegoldenrod: "eee8aa",
+	        palegreen: "98fb98",
+	        paleturquoise: "afeeee",
+	        palevioletred: "db7093",
+	        papayawhip: "ffefd5",
+	        peachpuff: "ffdab9",
+	        peru: "cd853f",
+	        pink: "ffc0cb",
+	        plum: "dda0dd",
+	        powderblue: "b0e0e6",
+	        purple: "800080",
+	        rebeccapurple: "663399",
+	        red: "f00",
+	        rosybrown: "bc8f8f",
+	        royalblue: "4169e1",
+	        saddlebrown: "8b4513",
+	        salmon: "fa8072",
+	        sandybrown: "f4a460",
+	        seagreen: "2e8b57",
+	        seashell: "fff5ee",
+	        sienna: "a0522d",
+	        silver: "c0c0c0",
+	        skyblue: "87ceeb",
+	        slateblue: "6a5acd",
+	        slategray: "708090",
+	        slategrey: "708090",
+	        snow: "fffafa",
+	        springgreen: "00ff7f",
+	        steelblue: "4682b4",
+	        tan: "d2b48c",
+	        teal: "008080",
+	        thistle: "d8bfd8",
+	        tomato: "ff6347",
+	        turquoise: "40e0d0",
+	        violet: "ee82ee",
+	        wheat: "f5deb3",
+	        white: "fff",
+	        whitesmoke: "f5f5f5",
+	        yellow: "ff0",
+	        yellowgreen: "9acd32"
+	    };
+
+	    // Make it easy to access colors via `hexNames[hex]`
+	    var hexNames = tinycolor.hexNames = flip(names);
+
+	    // Utilities
+	    // ---------
+
+	    // `{ 'name1': 'val1' }` becomes `{ 'val1': 'name1' }`
+	    function flip(o) {
+	        var flipped = {};
+	        for (var i in o) {
+	            if (o.hasOwnProperty(i)) {
+	                flipped[o[i]] = i;
+	            }
+	        }
+	        return flipped;
+	    }
+
+	    // Return a valid alpha value [0,1] with all invalid values being set to 1
+	    function boundAlpha(a) {
+	        a = parseFloat(a);
+
+	        if (isNaN(a) || a < 0 || a > 1) {
+	            a = 1;
+	        }
+
+	        return a;
+	    }
+
+	    // Take input from [0, n] and return it as [0, 1]
+	    function bound01(n, max) {
+	        if (isOnePointZero(n)) {
+	            n = "100%";
+	        }
+
+	        var processPercent = isPercentage(n);
+	        n = mathMin(max, mathMax(0, parseFloat(n)));
+
+	        // Automatically convert percentage into number
+	        if (processPercent) {
+	            n = parseInt(n * max, 10) / 100;
+	        }
+
+	        // Handle floating point rounding errors
+	        if (math.abs(n - max) < 0.000001) {
+	            return 1;
+	        }
+
+	        // Convert into [0, 1] range if it isn't already
+	        return n % max / parseFloat(max);
+	    }
+
+	    // Force a number between 0 and 1
+	    function clamp01(val) {
+	        return mathMin(1, mathMax(0, val));
+	    }
+
+	    // Parse a base-16 hex value into a base-10 integer
+	    function parseIntFromHex(val) {
+	        return parseInt(val, 16);
+	    }
+
+	    // Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
+	    // <http://stackoverflow.com/questions/7422072/javascript-how-to-detect-number-as-a-decimal-including-1-0>
+	    function isOnePointZero(n) {
+	        return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
+	    }
+
+	    // Check to see if string passed in is a percentage
+	    function isPercentage(n) {
+	        return typeof n === "string" && n.indexOf('%') != -1;
+	    }
+
+	    // Force a hex value to have 2 characters
+	    function pad2(c) {
+	        return c.length == 1 ? '0' + c : '' + c;
+	    }
+
+	    // Replace a decimal with it's percentage value
+	    function convertToPercentage(n) {
+	        if (n <= 1) {
+	            n = n * 100 + "%";
+	        }
+
+	        return n;
+	    }
+
+	    // Converts a decimal to a hex value
+	    function convertDecimalToHex(d) {
+	        return Math.round(parseFloat(d) * 255).toString(16);
+	    }
+	    // Converts a hex value to a decimal
+	    function convertHexToDecimal(h) {
+	        return parseIntFromHex(h) / 255;
+	    }
+
+	    var matchers = function () {
+
+	        // <http://www.w3.org/TR/css3-values/#integers>
+	        var CSS_INTEGER = "[-\\+]?\\d+%?";
+
+	        // <http://www.w3.org/TR/css3-values/#number-value>
+	        var CSS_NUMBER = "[-\\+]?\\d*\\.\\d+%?";
+
+	        // Allow positive/negative integer/number.  Don't capture the either/or, just the entire outcome.
+	        var CSS_UNIT = "(?:" + CSS_NUMBER + ")|(?:" + CSS_INTEGER + ")";
+
+	        // Actual matching.
+	        // Parentheses and commas are optional, but not required.
+	        // Whitespace can take the place of commas or opening paren
+	        var PERMISSIVE_MATCH3 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
+	        var PERMISSIVE_MATCH4 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
+
+	        return {
+	            rgb: new RegExp("rgb" + PERMISSIVE_MATCH3),
+	            rgba: new RegExp("rgba" + PERMISSIVE_MATCH4),
+	            hsl: new RegExp("hsl" + PERMISSIVE_MATCH3),
+	            hsla: new RegExp("hsla" + PERMISSIVE_MATCH4),
+	            hsv: new RegExp("hsv" + PERMISSIVE_MATCH3),
+	            hsva: new RegExp("hsva" + PERMISSIVE_MATCH4),
+	            hex3: /^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,
+	            hex6: /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/,
+	            hex8: /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
+	        };
+	    }();
+
+	    // `stringInputToObject`
+	    // Permissive string parsing.  Take in a number of formats, and output an object
+	    // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
+	    function stringInputToObject(color) {
+
+	        color = color.replace(trimLeft, '').replace(trimRight, '').toLowerCase();
+	        var named = false;
+	        if (names[color]) {
+	            color = names[color];
+	            named = true;
+	        } else if (color == 'transparent') {
+	            return { r: 0, g: 0, b: 0, a: 0, format: "name" };
+	        }
+
+	        // Try to match string input using regular expressions.
+	        // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
+	        // Just return an object and let the conversion functions handle that.
+	        // This way the result will be the same whether the tinycolor is initialized with string or object.
+	        var match;
+	        if (match = matchers.rgb.exec(color)) {
+	            return { r: match[1], g: match[2], b: match[3] };
+	        }
+	        if (match = matchers.rgba.exec(color)) {
+	            return { r: match[1], g: match[2], b: match[3], a: match[4] };
+	        }
+	        if (match = matchers.hsl.exec(color)) {
+	            return { h: match[1], s: match[2], l: match[3] };
+	        }
+	        if (match = matchers.hsla.exec(color)) {
+	            return { h: match[1], s: match[2], l: match[3], a: match[4] };
+	        }
+	        if (match = matchers.hsv.exec(color)) {
+	            return { h: match[1], s: match[2], v: match[3] };
+	        }
+	        if (match = matchers.hsva.exec(color)) {
+	            return { h: match[1], s: match[2], v: match[3], a: match[4] };
+	        }
+	        if (match = matchers.hex8.exec(color)) {
+	            return {
+	                a: convertHexToDecimal(match[1]),
+	                r: parseIntFromHex(match[2]),
+	                g: parseIntFromHex(match[3]),
+	                b: parseIntFromHex(match[4]),
+	                format: named ? "name" : "hex8"
+	            };
+	        }
+	        if (match = matchers.hex6.exec(color)) {
+	            return {
+	                r: parseIntFromHex(match[1]),
+	                g: parseIntFromHex(match[2]),
+	                b: parseIntFromHex(match[3]),
+	                format: named ? "name" : "hex"
+	            };
+	        }
+	        if (match = matchers.hex3.exec(color)) {
+	            return {
+	                r: parseIntFromHex(match[1] + '' + match[1]),
+	                g: parseIntFromHex(match[2] + '' + match[2]),
+	                b: parseIntFromHex(match[3] + '' + match[3]),
+	                format: named ? "name" : "hex"
+	            };
+	        }
+
+	        return false;
+	    }
+
+	    function validateWCAG2Parms(parms) {
+	        // return valid WCAG2 parms for isReadable.
+	        // If input parms are invalid, return {"level":"AA", "size":"small"}
+	        var level, size;
+	        parms = parms || { "level": "AA", "size": "small" };
+	        level = (parms.level || "AA").toUpperCase();
+	        size = (parms.size || "small").toLowerCase();
+	        if (level !== "AA" && level !== "AAA") {
+	            level = "AA";
+	        }
+	        if (size !== "small" && size !== "large") {
+	            size = "small";
+	        }
+	        return { "level": level, "size": size };
+	    }
+
+	    // Node: Export function
+	    if (typeof module !== "undefined" && module.exports) {
+	        module.exports = tinycolor;
+	    }
+	    // AMD/requirejs: Define the module
+	    else if (true) {
+	            !(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	                return tinycolor;
+	            }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        }
+	        // Browser: Expose to window
+	        else {
+	                window.tinycolor = tinycolor;
+	            }
+	})();
+
+/***/ },
+/* 174 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {'use strict';
@@ -22986,10 +24076,10 @@
 	});
 	;
 	//# sourceMappingURL=index.js.map
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(174)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(175)(module)))
 
 /***/ },
-/* 174 */
+/* 175 */
 /***/ function(module, exports) {
 
 	module.exports = function (module) {
@@ -23002,803 +24092,6 @@
 		}
 		return module;
 	};
-
-/***/ },
-/* 175 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	// (c) Dean McNamee <dean@gmail.com>, 2013.
-	//
-	// https://github.com/deanm/omggif
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a copy
-	// of this software and associated documentation files (the "Software"), to
-	// deal in the Software without restriction, including without limitation the
-	// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-	// sell copies of the Software, and to permit persons to whom the Software is
-	// furnished to do so, subject to the following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included in
-	// all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-	// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-	// IN THE SOFTWARE.
-	//
-	// omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
-	// including animation and compression.  It does not rely on any specific
-	// underlying system, so should run in the browser, Node, or Plask.
-
-	function GifWriter(buf, width, height, gopts) {
-	  var p = 0;
-
-	  var gopts = gopts === undefined ? {} : gopts;
-	  var loop_count = gopts.loop === undefined ? null : gopts.loop;
-	  var global_palette = gopts.palette === undefined ? null : gopts.palette;
-
-	  if (width <= 0 || height <= 0 || width > 65535 || height > 65535) throw "Width/Height invalid.";
-
-	  function check_palette_and_num_colors(palette) {
-	    var num_colors = palette.length;
-	    if (num_colors < 2 || num_colors > 256 || num_colors & num_colors - 1) throw "Invalid code/color length, must be power of 2 and 2 .. 256.";
-	    return num_colors;
-	  }
-
-	  // - Header.
-	  buf[p++] = 0x47;buf[p++] = 0x49;buf[p++] = 0x46; // GIF
-	  buf[p++] = 0x38;buf[p++] = 0x39;buf[p++] = 0x61; // 89a
-
-	  // Handling of Global Color Table (palette) and background index.
-	  var gp_num_colors_pow2 = 0;
-	  var background = 0;
-	  if (global_palette !== null) {
-	    var gp_num_colors = check_palette_and_num_colors(global_palette);
-	    while (gp_num_colors >>= 1) {
-	      ++gp_num_colors_pow2;
-	    }gp_num_colors = 1 << gp_num_colors_pow2;
-	    --gp_num_colors_pow2;
-	    if (gopts.background !== undefined) {
-	      background = gopts.background;
-	      if (background >= gp_num_colors) throw "Background index out of range.";
-	      // The GIF spec states that a background index of 0 should be ignored, so
-	      // this is probably a mistake and you really want to set it to another
-	      // slot in the palette.  But actually in the end most browsers, etc end
-	      // up ignoring this almost completely (including for dispose background).
-	      if (background === 0) throw "Background index explicitly passed as 0.";
-	    }
-	  }
-
-	  // - Logical Screen Descriptor.
-	  // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
-	  buf[p++] = width & 0xff;buf[p++] = width >> 8 & 0xff;
-	  buf[p++] = height & 0xff;buf[p++] = height >> 8 & 0xff;
-	  // NOTE: Indicates 0-bpp original color resolution (unused?).
-	  buf[p++] = (global_palette !== null ? 0x80 : 0) | // Global Color Table Flag.
-	  gp_num_colors_pow2; // NOTE: No sort flag (unused?).
-	  buf[p++] = background; // Background Color Index.
-	  buf[p++] = 0; // Pixel aspect ratio (unused?).
-
-	  // - Global Color Table
-	  if (global_palette !== null) {
-	    for (var i = 0, il = global_palette.length; i < il; ++i) {
-	      var rgb = global_palette[i];
-	      buf[p++] = rgb >> 16 & 0xff;
-	      buf[p++] = rgb >> 8 & 0xff;
-	      buf[p++] = rgb & 0xff;
-	    }
-	  }
-
-	  if (loop_count !== null) {
-	    // Netscape block for looping.
-	    if (loop_count < 0 || loop_count > 65535) throw "Loop count invalid.";
-	    // Extension code, label, and length.
-	    buf[p++] = 0x21;buf[p++] = 0xff;buf[p++] = 0x0b;
-	    // NETSCAPE2.0
-	    buf[p++] = 0x4e;buf[p++] = 0x45;buf[p++] = 0x54;buf[p++] = 0x53;
-	    buf[p++] = 0x43;buf[p++] = 0x41;buf[p++] = 0x50;buf[p++] = 0x45;
-	    buf[p++] = 0x32;buf[p++] = 0x2e;buf[p++] = 0x30;
-	    // Sub-block
-	    buf[p++] = 0x03;buf[p++] = 0x01;
-	    buf[p++] = loop_count & 0xff;buf[p++] = loop_count >> 8 & 0xff;
-	    buf[p++] = 0x00; // Terminator.
-	  }
-
-	  var ended = false;
-
-	  this.addFrame = function (x, y, w, h, indexed_pixels, opts) {
-	    if (ended === true) {
-	      --p;ended = false;
-	    } // Un-end.
-
-	    opts = opts === undefined ? {} : opts;
-
-	    // TODO(deanm): Bounds check x, y.  Do they need to be within the virtual
-	    // canvas width/height, I imagine?
-	    if (x < 0 || y < 0 || x > 65535 || y > 65535) throw "x/y invalid.";
-
-	    if (w <= 0 || h <= 0 || w > 65535 || h > 65535) throw "Width/Height invalid.";
-
-	    if (indexed_pixels.length < w * h) throw "Not enough pixels for the frame size.";
-
-	    var using_local_palette = true;
-	    var palette = opts.palette;
-	    if (palette === undefined || palette === null) {
-	      using_local_palette = false;
-	      palette = global_palette;
-	    }
-
-	    if (palette === undefined || palette === null) throw "Must supply either a local or global palette.";
-
-	    var num_colors = check_palette_and_num_colors(palette);
-
-	    // Compute the min_code_size (power of 2), destroying num_colors.
-	    var min_code_size = 0;
-	    while (num_colors >>= 1) {
-	      ++min_code_size;
-	    }num_colors = 1 << min_code_size; // Now we can easily get it back.
-
-	    var delay = opts.delay === undefined ? 0 : opts.delay;
-
-	    // From the spec:
-	    //     0 -   No disposal specified. The decoder is
-	    //           not required to take any action.
-	    //     1 -   Do not dispose. The graphic is to be left
-	    //           in place.
-	    //     2 -   Restore to background color. The area used by the
-	    //           graphic must be restored to the background color.
-	    //     3 -   Restore to previous. The decoder is required to
-	    //           restore the area overwritten by the graphic with
-	    //           what was there prior to rendering the graphic.
-	    //  4-7 -    To be defined.
-	    // NOTE(deanm): Dispose background doesn't really work, apparently most
-	    // browsers ignore the background palette index and clear to transparency.
-	    var disposal = opts.disposal === undefined ? 0 : opts.disposal;
-	    if (disposal < 0 || disposal > 3) // 4-7 is reserved.
-	      throw "Disposal out of range.";
-
-	    var use_transparency = false;
-	    var transparent_index = 0;
-	    if (opts.transparent !== undefined && opts.transparent !== null) {
-	      use_transparency = true;
-	      transparent_index = opts.transparent;
-	      if (transparent_index < 0 || transparent_index >= num_colors) throw "Transparent color index.";
-	    }
-
-	    if (disposal !== 0 || use_transparency || delay !== 0) {
-	      // - Graphics Control Extension
-	      buf[p++] = 0x21;buf[p++] = 0xf9; // Extension / Label.
-	      buf[p++] = 4; // Byte size.
-
-	      buf[p++] = disposal << 2 | (use_transparency === true ? 1 : 0);
-	      buf[p++] = delay & 0xff;buf[p++] = delay >> 8 & 0xff;
-	      buf[p++] = transparent_index; // Transparent color index.
-	      buf[p++] = 0; // Block Terminator.
-	    }
-
-	    // - Image Descriptor
-	    buf[p++] = 0x2c; // Image Seperator.
-	    buf[p++] = x & 0xff;buf[p++] = x >> 8 & 0xff; // Left.
-	    buf[p++] = y & 0xff;buf[p++] = y >> 8 & 0xff; // Top.
-	    buf[p++] = w & 0xff;buf[p++] = w >> 8 & 0xff;
-	    buf[p++] = h & 0xff;buf[p++] = h >> 8 & 0xff;
-	    // NOTE: No sort flag (unused?).
-	    // TODO(deanm): Support interlace.
-	    buf[p++] = using_local_palette === true ? 0x80 | min_code_size - 1 : 0;
-
-	    // - Local Color Table
-	    if (using_local_palette === true) {
-	      for (var i = 0, il = palette.length; i < il; ++i) {
-	        var rgb = palette[i];
-	        buf[p++] = rgb >> 16 & 0xff;
-	        buf[p++] = rgb >> 8 & 0xff;
-	        buf[p++] = rgb & 0xff;
-	      }
-	    }
-
-	    p = GifWriterOutputLZWCodeStream(buf, p, min_code_size < 2 ? 2 : min_code_size, indexed_pixels);
-	  };
-
-	  this.end = function () {
-	    if (ended === false) {
-	      buf[p++] = 0x3b; // Trailer.
-	      ended = true;
-	    }
-	    return p;
-	  };
-	}
-
-	// Main compression routine, palette indexes -> LZW code stream.
-	// |index_stream| must have at least one entry.
-	function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
-	  buf[p++] = min_code_size;
-	  var cur_subblock = p++; // Pointing at the length field.
-
-	  var clear_code = 1 << min_code_size;
-	  var code_mask = clear_code - 1;
-	  var eoi_code = clear_code + 1;
-	  var next_code = eoi_code + 1;
-
-	  var cur_code_size = min_code_size + 1; // Number of bits per code.
-	  var cur_shift = 0;
-	  // We have at most 12-bit codes, so we should have to hold a max of 19
-	  // bits here (and then we would write out).
-	  var cur = 0;
-
-	  function emit_bytes_to_buffer(bit_block_size) {
-	    while (cur_shift >= bit_block_size) {
-	      buf[p++] = cur & 0xff;
-	      cur >>= 8;cur_shift -= 8;
-	      if (p === cur_subblock + 256) {
-	        // Finished a subblock.
-	        buf[cur_subblock] = 255;
-	        cur_subblock = p++;
-	      }
-	    }
-	  }
-
-	  function emit_code(c) {
-	    cur |= c << cur_shift;
-	    cur_shift += cur_code_size;
-	    emit_bytes_to_buffer(8);
-	  }
-
-	  // I am not an expert on the topic, and I don't want to write a thesis.
-	  // However, it is good to outline here the basic algorithm and the few data
-	  // structures and optimizations here that make this implementation fast.
-	  // The basic idea behind LZW is to build a table of previously seen runs
-	  // addressed by a short id (herein called output code).  All data is
-	  // referenced by a code, which represents one or more values from the
-	  // original input stream.  All input bytes can be referenced as the same
-	  // value as an output code.  So if you didn't want any compression, you
-	  // could more or less just output the original bytes as codes (there are
-	  // some details to this, but it is the idea).  In order to achieve
-	  // compression, values greater then the input range (codes can be up to
-	  // 12-bit while input only 8-bit) represent a sequence of previously seen
-	  // inputs.  The decompressor is able to build the same mapping while
-	  // decoding, so there is always a shared common knowledge between the
-	  // encoding and decoder, which is also important for "timing" aspects like
-	  // how to handle variable bit width code encoding.
-	  //
-	  // One obvious but very important consequence of the table system is there
-	  // is always a unique id (at most 12-bits) to map the runs.  'A' might be
-	  // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
-	  // can be used for an effecient lookup strategy for the code mapping.  We
-	  // need to know if a run has been seen before, and be able to map that run
-	  // to the output code.  Since we start with known unique ids (input bytes),
-	  // and then from those build more unique ids (table entries), we can
-	  // continue this chain (almost like a linked list) to always have small
-	  // integer values that represent the current byte chains in the encoder.
-	  // This means instead of tracking the input bytes (AAAABCD) to know our
-	  // current state, we can track the table entry for AAAABC (it is guaranteed
-	  // to exist by the nature of the algorithm) and the next character D.
-	  // Therefor the tuple of (table_entry, byte) is guaranteed to also be
-	  // unique.  This allows us to create a simple lookup key for mapping input
-	  // sequences to codes (table indices) without having to store or search
-	  // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
-	  // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
-	  // key.  This leads to a integer value at most 20-bits, which can always
-	  // fit in an SMI value and be used as a fast sparse array / object key.
-
-	  // Output code for the current contents of the index buffer.
-	  var ib_code = index_stream[0] & code_mask; // Load first input index.
-	  var code_table = {}; // Key'd on our 20-bit "tuple".
-
-	  emit_code(clear_code); // Spec says first code should be a clear code.
-
-	  // First index already loaded, process the rest of the stream.
-	  for (var i = 1, il = index_stream.length; i < il; ++i) {
-	    var k = index_stream[i] & code_mask;
-	    var cur_key = ib_code << 8 | k; // (prev, k) unique tuple.
-	    var cur_code = code_table[cur_key]; // buffer + k.
-
-	    // Check if we have to create a new code table entry.
-	    if (cur_code === undefined) {
-	      // We don't have buffer + k.
-	      // Emit index buffer (without k).
-	      // This is an inline version of emit_code, because this is the core
-	      // writing routine of the compressor (and V8 cannot inline emit_code
-	      // because it is a closure here in a different context).  Additionally
-	      // we can call emit_byte_to_buffer less often, because we can have
-	      // 30-bits (from our 31-bit signed SMI), and we know our codes will only
-	      // be 12-bits, so can safely have 18-bits there without overflow.
-	      // emit_code(ib_code);
-	      cur |= ib_code << cur_shift;
-	      cur_shift += cur_code_size;
-	      while (cur_shift >= 8) {
-	        buf[p++] = cur & 0xff;
-	        cur >>= 8;cur_shift -= 8;
-	        if (p === cur_subblock + 256) {
-	          // Finished a subblock.
-	          buf[cur_subblock] = 255;
-	          cur_subblock = p++;
-	        }
-	      }
-
-	      if (next_code === 4096) {
-	        // Table full, need a clear.
-	        emit_code(clear_code);
-	        next_code = eoi_code + 1;
-	        cur_code_size = min_code_size + 1;
-	        code_table = {};
-	      } else {
-	        // Table not full, insert a new entry.
-	        // Increase our variable bit code sizes if necessary.  This is a bit
-	        // tricky as it is based on "timing" between the encoding and
-	        // decoder.  From the encoders perspective this should happen after
-	        // we've already emitted the index buffer and are about to create the
-	        // first table entry that would overflow our current code bit size.
-	        if (next_code >= 1 << cur_code_size) ++cur_code_size;
-	        code_table[cur_key] = next_code++; // Insert into code table.
-	      }
-
-	      ib_code = k; // Index buffer to single input k.
-	    } else {
-	        ib_code = cur_code; // Index buffer to sequence in code table.
-	      }
-	  }
-
-	  emit_code(ib_code); // There will still be something in the index buffer.
-	  emit_code(eoi_code); // End Of Information.
-
-	  // Flush / finalize the sub-blocks stream to the buffer.
-	  emit_bytes_to_buffer(1);
-
-	  // Finish the sub-blocks, writing out any unfinished lengths and
-	  // terminating with a sub-block of length 0.  If we have already started
-	  // but not yet used a sub-block it can just become the terminator.
-	  if (cur_subblock + 1 === p) {
-	    // Started but unused.
-	    buf[cur_subblock] = 0;
-	  } else {
-	    // Started and used, write length and additional terminator block.
-	    buf[cur_subblock] = p - cur_subblock - 1;
-	    buf[p++] = 0;
-	  }
-	  return p;
-	}
-
-	function GifReader(buf) {
-	  var p = 0;
-
-	  // - Header (GIF87a or GIF89a).
-	  if (buf[p++] !== 0x47 || buf[p++] !== 0x49 || buf[p++] !== 0x46 || buf[p++] !== 0x38 || (buf[p++] + 1 & 0xfd) !== 0x38 || buf[p++] !== 0x61) {
-	    throw "Invalid GIF 87a/89a header.";
-	  }
-
-	  // - Logical Screen Descriptor.
-	  var width = buf[p++] | buf[p++] << 8;
-	  var height = buf[p++] | buf[p++] << 8;
-	  var pf0 = buf[p++]; // <Packed Fields>.
-	  var global_palette_flag = pf0 >> 7;
-	  var num_global_colors_pow2 = pf0 & 0x7;
-	  var num_global_colors = 1 << num_global_colors_pow2 + 1;
-	  var background = buf[p++];
-	  buf[p++]; // Pixel aspect ratio (unused?).
-
-	  var global_palette_offset = null;
-
-	  if (global_palette_flag) {
-	    global_palette_offset = p;
-	    p += num_global_colors * 3; // Seek past palette.
-	  }
-
-	  var no_eof = true;
-
-	  var frames = [];
-
-	  var delay = 0;
-	  var transparent_index = null;
-	  var disposal = 0; // 0 - No disposal specified.
-	  var loop_count = null;
-
-	  this.width = width;
-	  this.height = height;
-
-	  while (no_eof && p < buf.length) {
-	    switch (buf[p++]) {
-	      case 0x21:
-	        // Graphics Control Extension Block
-	        switch (buf[p++]) {
-	          case 0xff:
-	            // Application specific block
-	            // Try if it's a Netscape block (with animation loop counter).
-	            if (buf[p] !== 0x0b || // 21 FF already read, check block size.
-	            // NETSCAPE2.0
-	            buf[p + 1] == 0x4e && buf[p + 2] == 0x45 && buf[p + 3] == 0x54 && buf[p + 4] == 0x53 && buf[p + 5] == 0x43 && buf[p + 6] == 0x41 && buf[p + 7] == 0x50 && buf[p + 8] == 0x45 && buf[p + 9] == 0x32 && buf[p + 10] == 0x2e && buf[p + 11] == 0x30 &&
-	            // Sub-block
-	            buf[p + 12] == 0x03 && buf[p + 13] == 0x01 && buf[p + 16] == 0) {
-	              p += 14;
-	              loop_count = buf[p++] | buf[p++] << 8;
-	              p++; // Skip terminator.
-	            } else {
-	                // We don't know what it is, just try to get past it.
-	                p += 12;
-	                while (true) {
-	                  // Seek through subblocks.
-	                  var block_size = buf[p++];
-	                  if (block_size === 0) break;
-	                  p += block_size;
-	                }
-	              }
-	            break;
-
-	          case 0xf9:
-	            // Graphics Control Extension
-	            if (buf[p++] !== 0x4 || buf[p + 4] !== 0) throw "Invalid graphics extension block.";
-	            var pf1 = buf[p++];
-	            delay = buf[p++] | buf[p++] << 8;
-	            transparent_index = buf[p++];
-	            if ((pf1 & 1) === 0) transparent_index = null;
-	            disposal = pf1 >> 2 & 0x7;
-	            p++; // Skip terminator.
-	            break;
-
-	          case 0xfe:
-	            // Comment Extension.
-	            while (true) {
-	              // Seek through subblocks.
-	              var block_size = buf[p++];
-	              if (block_size === 0) break;
-	              // console.log(buf.slice(p, p+block_size).toString('ascii'));
-	              p += block_size;
-	            }
-	            break;
-
-	          default:
-	            throw "Unknown graphic control label: 0x" + buf[p - 1].toString(16);
-	        }
-	        break;
-
-	      case 0x2c:
-	        // Image Descriptor.
-	        var x = buf[p++] | buf[p++] << 8;
-	        var y = buf[p++] | buf[p++] << 8;
-	        var w = buf[p++] | buf[p++] << 8;
-	        var h = buf[p++] | buf[p++] << 8;
-	        var pf2 = buf[p++];
-	        var local_palette_flag = pf2 >> 7;
-	        var interlace_flag = pf2 >> 6 & 1;
-	        var num_local_colors_pow2 = pf2 & 0x7;
-	        var num_local_colors = 1 << num_local_colors_pow2 + 1;
-	        var palette_offset = global_palette_offset;
-	        var has_local_palette = false;
-	        if (local_palette_flag) {
-	          var has_local_palette = true;
-	          palette_offset = p; // Override with local palette.
-	          p += num_local_colors * 3; // Seek past palette.
-	        }
-
-	        var data_offset = p;
-
-	        p++; // codesize
-	        while (true) {
-	          var block_size = buf[p++];
-	          if (block_size === 0) break;
-	          p += block_size;
-	        }
-
-	        frames.push({ x: x, y: y, width: w, height: h,
-	          has_local_palette: has_local_palette,
-	          palette_offset: palette_offset,
-	          data_offset: data_offset,
-	          data_length: p - data_offset,
-	          transparent_index: transparent_index,
-	          interlaced: !!interlace_flag,
-	          delay: delay,
-	          disposal: disposal });
-	        break;
-
-	      case 0x3b:
-	        // Trailer Marker (end of file).
-	        no_eof = false;
-	        break;
-
-	      default:
-	        throw "Unknown gif block: 0x" + buf[p - 1].toString(16);
-	        break;
-	    }
-	  }
-
-	  this.numFrames = function () {
-	    return frames.length;
-	  };
-
-	  this.loopCount = function () {
-	    return loop_count;
-	  };
-
-	  this.frameInfo = function (frame_num) {
-	    if (frame_num < 0 || frame_num >= frames.length) throw "Frame index out of range.";
-	    return frames[frame_num];
-	  };
-
-	  this.decodeAndBlitFrameBGRA = function (frame_num, pixels) {
-	    var frame = this.frameInfo(frame_num);
-	    var num_pixels = frame.width * frame.height;
-	    var index_stream = new Uint8Array(num_pixels); // At most 8-bit indices.
-	    GifReaderLZWOutputIndexStream(buf, frame.data_offset, index_stream, num_pixels);
-	    var palette_offset = frame.palette_offset;
-
-	    // NOTE(deanm): It seems to be much faster to compare index to 256 than
-	    // to === null.  Not sure why, but CompareStub_EQ_STRICT shows up high in
-	    // the profile, not sure if it's related to using a Uint8Array.
-	    var trans = frame.transparent_index;
-	    if (trans === null) trans = 256;
-
-	    // We are possibly just blitting to a portion of the entire frame.
-	    // That is a subrect within the framerect, so the additional pixels
-	    // must be skipped over after we finished a scanline.
-	    var framewidth = frame.width;
-	    var framestride = width - framewidth;
-	    var xleft = framewidth; // Number of subrect pixels left in scanline.
-
-	    // Output indicies of the top left and bottom right corners of the subrect.
-	    var opbeg = (frame.y * width + frame.x) * 4;
-	    var opend = ((frame.y + frame.height) * width + frame.x) * 4;
-	    var op = opbeg;
-
-	    var scanstride = framestride * 4;
-
-	    // Use scanstride to skip past the rows when interlacing.  This is skipping
-	    // 7 rows for the first two passes, then 3 then 1.
-	    if (frame.interlaced === true) {
-	      scanstride += width * 4 * 7; // Pass 1.
-	    }
-
-	    var interlaceskip = 8; // Tracking the row interval in the current pass.
-
-	    for (var i = 0, il = index_stream.length; i < il; ++i) {
-	      var index = index_stream[i];
-
-	      if (xleft === 0) {
-	        // Beginning of new scan line
-	        op += scanstride;
-	        xleft = framewidth;
-	        if (op >= opend) {
-	          // Catch the wrap to switch passes when interlacing.
-	          scanstride = framestride * 4 + width * 4 * (interlaceskip - 1);
-	          // interlaceskip / 2 * 4 is interlaceskip << 1.
-	          op = opbeg + (framewidth + framestride) * (interlaceskip << 1);
-	          interlaceskip >>= 1;
-	        }
-	      }
-
-	      if (index === trans) {
-	        op += 4;
-	      } else {
-	        var r = buf[palette_offset + index * 3];
-	        var g = buf[palette_offset + index * 3 + 1];
-	        var b = buf[palette_offset + index * 3 + 2];
-	        pixels[op++] = b;
-	        pixels[op++] = g;
-	        pixels[op++] = r;
-	        pixels[op++] = 255;
-	      }
-	      --xleft;
-	    }
-	  };
-
-	  // I will go to copy and paste hell one day...
-	  this.decodeAndBlitFrameRGBA = function (frame_num, pixels) {
-	    var frame = this.frameInfo(frame_num);
-	    var num_pixels = frame.width * frame.height;
-	    var index_stream = new Uint8Array(num_pixels); // At most 8-bit indices.
-	    GifReaderLZWOutputIndexStream(buf, frame.data_offset, index_stream, num_pixels);
-	    var palette_offset = frame.palette_offset;
-
-	    // NOTE(deanm): It seems to be much faster to compare index to 256 than
-	    // to === null.  Not sure why, but CompareStub_EQ_STRICT shows up high in
-	    // the profile, not sure if it's related to using a Uint8Array.
-	    var trans = frame.transparent_index;
-	    if (trans === null) trans = 256;
-
-	    // We are possibly just blitting to a portion of the entire frame.
-	    // That is a subrect within the framerect, so the additional pixels
-	    // must be skipped over after we finished a scanline.
-	    var framewidth = frame.width;
-	    var framestride = width - framewidth;
-	    var xleft = framewidth; // Number of subrect pixels left in scanline.
-
-	    // Output indicies of the top left and bottom right corners of the subrect.
-	    var opbeg = (frame.y * width + frame.x) * 4;
-	    var opend = ((frame.y + frame.height) * width + frame.x) * 4;
-	    var op = opbeg;
-
-	    var scanstride = framestride * 4;
-
-	    // Use scanstride to skip past the rows when interlacing.  This is skipping
-	    // 7 rows for the first two passes, then 3 then 1.
-	    if (frame.interlaced === true) {
-	      scanstride += width * 4 * 7; // Pass 1.
-	    }
-
-	    var interlaceskip = 8; // Tracking the row interval in the current pass.
-
-	    for (var i = 0, il = index_stream.length; i < il; ++i) {
-	      var index = index_stream[i];
-
-	      if (xleft === 0) {
-	        // Beginning of new scan line
-	        op += scanstride;
-	        xleft = framewidth;
-	        if (op >= opend) {
-	          // Catch the wrap to switch passes when interlacing.
-	          scanstride = framestride * 4 + width * 4 * (interlaceskip - 1);
-	          // interlaceskip / 2 * 4 is interlaceskip << 1.
-	          op = opbeg + (framewidth + framestride) * (interlaceskip << 1);
-	          interlaceskip >>= 1;
-	        }
-	      }
-
-	      if (index === trans) {
-	        op += 4;
-	      } else {
-	        var r = buf[palette_offset + index * 3];
-	        var g = buf[palette_offset + index * 3 + 1];
-	        var b = buf[palette_offset + index * 3 + 2];
-	        pixels[op++] = r;
-	        pixels[op++] = g;
-	        pixels[op++] = b;
-	        pixels[op++] = 255;
-	      }
-	      --xleft;
-	    }
-	  };
-	}
-
-	function GifReaderLZWOutputIndexStream(code_stream, p, output, output_length) {
-	  var min_code_size = code_stream[p++];
-
-	  var clear_code = 1 << min_code_size;
-	  var eoi_code = clear_code + 1;
-	  var next_code = eoi_code + 1;
-
-	  var cur_code_size = min_code_size + 1; // Number of bits per code.
-	  // NOTE: This shares the same name as the encoder, but has a different
-	  // meaning here.  Here this masks each code coming from the code stream.
-	  var code_mask = (1 << cur_code_size) - 1;
-	  var cur_shift = 0;
-	  var cur = 0;
-
-	  var op = 0; // Output pointer.
-
-	  var subblock_size = code_stream[p++];
-
-	  // TODO(deanm): Would using a TypedArray be any faster?  At least it would
-	  // solve the fast mode / backing store uncertainty.
-	  // var code_table = Array(4096);
-	  var code_table = new Int32Array(4096); // Can be signed, we only use 20 bits.
-
-	  var prev_code = null; // Track code-1.
-
-	  while (true) {
-	    // Read up to two bytes, making sure we always 12-bits for max sized code.
-	    while (cur_shift < 16) {
-	      if (subblock_size === 0) break; // No more data to be read.
-
-	      cur |= code_stream[p++] << cur_shift;
-	      cur_shift += 8;
-
-	      if (subblock_size === 1) {
-	        // Never let it get to 0 to hold logic above.
-	        subblock_size = code_stream[p++]; // Next subblock.
-	      } else {
-	          --subblock_size;
-	        }
-	    }
-
-	    // TODO(deanm): We should never really get here, we should have received
-	    // and EOI.
-	    if (cur_shift < cur_code_size) break;
-
-	    var code = cur & code_mask;
-	    cur >>= cur_code_size;
-	    cur_shift -= cur_code_size;
-
-	    // TODO(deanm): Maybe should check that the first code was a clear code,
-	    // at least this is what you're supposed to do.  But actually our encoder
-	    // now doesn't emit a clear code first anyway.
-	    if (code === clear_code) {
-	      // We don't actually have to clear the table.  This could be a good idea
-	      // for greater error checking, but we don't really do any anyway.  We
-	      // will just track it with next_code and overwrite old entries.
-
-	      next_code = eoi_code + 1;
-	      cur_code_size = min_code_size + 1;
-	      code_mask = (1 << cur_code_size) - 1;
-
-	      // Don't update prev_code ?
-	      prev_code = null;
-	      continue;
-	    } else if (code === eoi_code) {
-	      break;
-	    }
-
-	    // We have a similar situation as the decoder, where we want to store
-	    // variable length entries (code table entries), but we want to do in a
-	    // faster manner than an array of arrays.  The code below stores sort of a
-	    // linked list within the code table, and then "chases" through it to
-	    // construct the dictionary entries.  When a new entry is created, just the
-	    // last byte is stored, and the rest (prefix) of the entry is only
-	    // referenced by its table entry.  Then the code chases through the
-	    // prefixes until it reaches a single byte code.  We have to chase twice,
-	    // first to compute the length, and then to actually copy the data to the
-	    // output (backwards, since we know the length).  The alternative would be
-	    // storing something in an intermediate stack, but that doesn't make any
-	    // more sense.  I implemented an approach where it also stored the length
-	    // in the code table, although it's a bit tricky because you run out of
-	    // bits (12 + 12 + 8), but I didn't measure much improvements (the table
-	    // entries are generally not the long).  Even when I created benchmarks for
-	    // very long table entries the complexity did not seem worth it.
-	    // The code table stores the prefix entry in 12 bits and then the suffix
-	    // byte in 8 bits, so each entry is 20 bits.
-
-	    var chase_code = code < next_code ? code : prev_code;
-
-	    // Chase what we will output, either {CODE} or {CODE-1}.
-	    var chase_length = 0;
-	    var chase = chase_code;
-	    while (chase > clear_code) {
-	      chase = code_table[chase] >> 8;
-	      ++chase_length;
-	    }
-
-	    var k = chase;
-
-	    var op_end = op + chase_length + (chase_code !== code ? 1 : 0);
-	    if (op_end > output_length) {
-	      console.log("Warning, gif stream longer than expected.");
-	      return;
-	    }
-
-	    // Already have the first byte from the chase, might as well write it fast.
-	    output[op++] = k;
-
-	    op += chase_length;
-	    var b = op; // Track pointer, writing backwards.
-
-	    if (chase_code !== code) // The case of emitting {CODE-1} + k.
-	      output[op++] = k;
-
-	    chase = chase_code;
-	    while (chase_length--) {
-	      chase = code_table[chase];
-	      output[--b] = chase & 0xff; // Write backwards.
-	      chase >>= 8; // Pull down to the prefix code.
-	    }
-
-	    if (prev_code !== null && next_code < 4096) {
-	      code_table[next_code++] = prev_code << 8 | k;
-	      // TODO(deanm): Figure out this clearing vs code growth logic better.  I
-	      // have an feeling that it should just happen somewhere else, for now it
-	      // is awkward between when we grow past the max and then hit a clear code.
-	      // For now just check if we hit the max 12-bits (then a clear code should
-	      // follow, also of course encoded in 12-bits).
-	      if (next_code >= code_mask + 1 && cur_code_size < 12) {
-	        ++cur_code_size;
-	        code_mask = code_mask << 1 | 1;
-	      }
-	    }
-
-	    prev_code = code;
-	  }
-
-	  if (op !== output_length) {
-	    console.log("Warning, gif stream shorter than expected.");
-	  }
-
-	  return output;
-	}
-
-	try {
-	  exports.GifWriter = GifWriter;exports.GifReader = GifReader;
-	} catch (e) {} // CommonJS.
 
 /***/ }
 /******/ ]);

@@ -5,7 +5,7 @@ module.exports={
   limit
 };
 
-function limitTemplate(qrBytes,ctlBytes,blockSize,d2,minLightness,maxLightness) {
+function limitTemplate(qrBytes,ctlBytes,blockSize=6,d2=1,minLightness=0,maxLightness=1) {
   var baseSize=qrBytes.length;
   var imageSize=baseSize*blockSize;
   var imageLength=imageSize*imageSize;
@@ -17,9 +17,9 @@ function limitTemplate(qrBytes,ctlBytes,blockSize,d2,minLightness,maxLightness) 
   for (let i = 0; i < DlimitTemplate.length; i++) {
     DlimitTemplate[i]=0;
   }
-  const idx2rowcol=idx=>({row:Math.floor(idx/imageLength),col:Math.floor(idx%imageLength)});
-  const rowcol2xy=({row,col})=>({x:Math.floor(row/6),y:Math.floor(row/6)});
-  const rowcol2dxdy=({row,col})=>({dx:row%6,dy:row%6});
+  const idx2rowcol=idx=>({row:Math.floor(idx/imageSize),col:Math.floor(idx%imageSize)});
+  const rowcol2xy=({row,col})=>({x:Math.floor(col/6),y:Math.floor(row/6)});
+  const rowcol2dxdy=({row,col})=>({dx:col%6,dy:row%6});
   const dxdy2didx=({dx,dy})=>dy*blockSize+dx;
   var DlimitBlockTemplate=buildDlimitBlockTemplate(blockSize,d2);
   var UlimitBlockTemplate=buildUlimitBlockTemplate(blockSize,d2);
@@ -28,7 +28,7 @@ function limitTemplate(qrBytes,ctlBytes,blockSize,d2,minLightness,maxLightness) 
     const {row,col}=idx2rowcol(i);//大图中行列
     const {x,y}=rowcol2xy({row,col});//对应二维码数组中坐标
     if(ctlBytes[x][y]!==null){//是控制块
-      if(ctlBytes[x][y]>127){//白色
+      if(!ctlBytes[x][y]){//白色
         DlimitTemplate[i]=maxLightness;
       }else{
         UlimitTemplate[i]=minLightness;
@@ -36,7 +36,7 @@ function limitTemplate(qrBytes,ctlBytes,blockSize,d2,minLightness,maxLightness) 
     }else{//内容块
       const {dx,dy}=rowcol2dxdy({row,col});//在小块中的偏移
       const didx=dxdy2didx({dx,dy});
-      if(qrBytes[x][y]>127){//白色
+      if(!qrBytes[x][y]){//白色
         DlimitTemplate[i]=DlimitBlockTemplate[didx];
       }else{//黑色
         UlimitTemplate[i]=UlimitBlockTemplate[didx];
@@ -70,6 +70,7 @@ function buildUlimitBlockTemplate(blockSize,d2){
   for (var i = 0; i < blockLength; i++) {
     UlimitBlockTemplate[i]=1-DlimitBlockTemplate[i];
   }
+  return UlimitBlockTemplate;
 }
 
 function limit(imageData,UlimitTemplate,DlimitTemplate) {
